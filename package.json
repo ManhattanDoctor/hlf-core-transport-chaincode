@@ -1,0 +1,31 @@
+{
+    "name": "@hlf-core/transport-chaincode",
+    "version": "3.0.0",
+    "description": "Hyperledger Fabric transport chaincode classes",
+    "main": "index.js",
+    "author": {
+        "name": "Renat Gubaev",
+        "email": "renat.gubaev@gmail.com"
+    },
+    "license": "ISC",
+    "dependencies": {
+        "@hlf-core/transport-common": "^3.0.2",
+        "@ts-core/common": "^3.0.7",
+        "fabric-shim": "^2.2.2",
+        "reflect-metadata": "^0.1.13"
+    },
+    "devDependencies": {
+        "gulp-npm-publisher": "^1.0.3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ManhattanDoctor/hlf-core-transport-chaincode"
+    },
+    "keywords": [
+        "typescript"
+    ],
+    "bugs": {
+        "url": "https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues"
+    },
+    "homepage": "https://github.com/ManhattanDoctor/hlf-core-transport-chaincode#readme"
+}
