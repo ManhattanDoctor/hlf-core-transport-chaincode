@@ -1,6 +1,5 @@
-import { ITransportCommand, ITransportCommandAsync, Transport } from '@ts-core/common';
+import { ExtendedError, ITransportCommand, ITransportCommandAsync, Transport } from '@ts-core/common';
 import * as _ from 'lodash';
-import { ExtendedError } from '@ts-core/common';
 import { ITransportFabricStub, ITransportFabricStubHolder } from './stub';
 import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
 

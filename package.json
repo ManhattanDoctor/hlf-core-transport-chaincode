@@ -8,9 +8,8 @@
         "email": "renat.gubaev@gmail.com"
     },
     "license": "ISC",
-    "dependencies": {
+    "peerDependencies": {
         "@hlf-core/transport-common": "^3.0.2",
-        "@ts-core/common": "^3.0.7",
         "fabric-shim": "^2.2.2",
         "reflect-metadata": "^0.1.13"
     },

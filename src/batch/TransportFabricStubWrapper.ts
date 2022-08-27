@@ -1,8 +1,9 @@
+import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { ITransportEvent, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub, Iterators } from 'fabric-shim';
 import * as _ from 'lodash';
-import { ITransportFabricCommandOptions } from '../../ITransportFabricCommandOptions';
-import { IKeyValue, TransportFabricStub } from '../stub';
+import { TransportFabricStub } from '../stub/TransportFabricStub';
+import { IKeyValue } from '../stub/ITransportFabricStub';
 import { StateProxy } from './StateProxy';
 
 export class TransportFabricStubWrapper extends TransportFabricStub {

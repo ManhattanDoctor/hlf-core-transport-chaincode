@@ -1,5 +1,5 @@
+import { ITransportFabricResponsePayload } from '@hlf-core/transport-common';
 import { ExtendedError } from '@ts-core/common';
-import { ITransportFabricResponsePayload } from '../../ITransportFabricResponsePayload';
 
 export interface ITransportFabricBatchDto {
     [key: string]: ITransportFabricResponsePayload | ExtendedError;

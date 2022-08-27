@@ -1,8 +1,7 @@
-import { TransformUtil, Destroyable, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
+import { ITransportEvent, ITransportReceiver, TransformUtil, Destroyable, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
 import * as _ from 'lodash';
 import { IKeyValue, ITransportFabricStub } from './ITransportFabricStub';
-import { ITransportEvent, ITransportReceiver } from '@ts-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
 
 export class TransportFabricStub extends Destroyable implements ITransportFabricStub {

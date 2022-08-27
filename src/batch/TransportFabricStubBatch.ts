@@ -3,8 +3,9 @@ import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
 import { ITransportCommand, ITransportEvent, Transport } from '@ts-core/common';
 import { StateProxy } from './StateProxy';
-import { IKeyValue, TransportFabricStub } from '../stub';
-import { ITransportFabricRequestPayload } from '../../ITransportFabricRequestPayload';
+import { TransportFabricStub } from '../stub/TransportFabricStub';
+import { IKeyValue } from '../stub/ITransportFabricStub';
+import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
 
 export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     // --------------------------------------------------------------------------

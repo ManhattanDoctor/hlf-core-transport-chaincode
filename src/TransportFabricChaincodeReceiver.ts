@@ -7,20 +7,20 @@ import {
     ITransportEvent,
     ITransportRequestStorage,
     Transport,
+    IDestroyable,
+    ISignature,
     TransportLogType,
+    ITransportCryptoManager,
     ITransportSettings,
     ITransportCommandOptions,
     ITransportCommandAsync,
     TransportCommandAsync,
-    ITransportReceiver
+    ITransportReceiver,
+    TransportWaitExceedError,
+    DateUtil, ObjectUtil
 } from '@ts-core/common';
-import { TransportWaitExceedError } from '@ts-core/common';
-import { DateUtil, ObjectUtil } from '@ts-core/common';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
-import { ISignature } from '@ts-core/common';
-import { IDestroyable } from '@ts-core/common';
-import { ITransportCryptoManager } from '@ts-core/common';
 import { ITransportFabricStub, TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
@@ -32,8 +32,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     //
     // --------------------------------------------------------------------------
 
-    protected defaultCreateStubFactory = <U>(stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) =>
-        new TransportFabricStub(stub, payload.id, payload.options, transport);
+    protected defaultCreateStubFactory = <U>(stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => new TransportFabricStub(stub, payload.id, payload.options, transport);
     protected defaultCreateCommandFactory = <U>(item: ITransportFabricRequestPayload<U>) => new TransportCommandAsync(item.name, item.request, item.id);
 
     // --------------------------------------------------------------------------

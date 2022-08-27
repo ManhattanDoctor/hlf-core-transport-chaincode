@@ -1,6 +1,4 @@
-import { Destroyable } from '@ts-core/common';
-import { ITransportEvent } from '@ts-core/common';
-import { ArrayUtil, ValidateUtil } from '@ts-core/common';
+import { Destroyable, ITransportEvent, ArrayUtil, ValidateUtil } from '@ts-core/common';
 import * as _ from 'lodash';
 import { IKeyValue } from '../stub';
 

@@ -1,8 +1,5 @@
 import { ITransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { ExtendedError } from '@ts-core/common';
-import { ILogger, LoggerWrapper } from '@ts-core/common';
-import { ObservableData } from '@ts-core/common';
-import { TransformUtil } from '@ts-core/common';
+import { ExtendedError, ObservableData, TransformUtil, ILogger, LoggerWrapper } from '@ts-core/common';
 import { Shim, ChaincodeInterface, ChaincodeResponse, ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';

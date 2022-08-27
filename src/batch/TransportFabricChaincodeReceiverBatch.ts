@@ -1,18 +1,13 @@
-import { ITransportCommand } from '@ts-core/common';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
-import { TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '../../constants';
-import { TransportFabricResponsePayload } from '../../TransportFabricResponsePayload';
-import { TransportFabricRequestPayload } from '../../TransportFabricRequestPayload';
 import { IKeyValue, ITransportFabricStub } from '../stub';
 import { ITransportFabricChaincodeSettings, TransportFabricChaincodeReceiver } from '../TransportFabricChaincodeReceiver';
-import { DatabaseManager } from '../database';
+import { DatabaseManager } from '../database/DatabaseManager';
 import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
-import { ExtendedError } from '@ts-core/common';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
-import { DateUtil, TransformUtil } from '@ts-core/common';
-import { ITransportFabricRequestPayload } from '../../ITransportFabricRequestPayload';
+import { DateUtil, ITransportCommand, ExtendedError, TransformUtil } from '@ts-core/common';
+import { ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
     // --------------------------------------------------------------------------
