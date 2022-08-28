@@ -2,19 +2,26 @@
     "name": "@hlf-core/transport-chaincode",
     "version": "3.0.2",
     "description": "Hyperledger Fabric transport chaincode classes",
-    "main": "index.js",
+    "main": "./cjs/public-api.js",
+    "module": "./esm/public-api.js",
+    "exports": {
+        ".": {
+            "import": "./esm/public-api.js",
+            "require": "./cjs/public-api.js"
+        }
+    },
     "author": {
         "name": "Renat Gubaev",
         "email": "renat.gubaev@gmail.com"
     },
     "license": "ISC",
-    "peerDependencies": {
+    "dependencies": {
         "@hlf-core/transport-common": "^3.0.2",
         "fabric-shim": "^2.2.2",
         "reflect-metadata": "^0.1.13"
     },
     "devDependencies": {
-        "gulp-npm-publisher": "^1.0.3"
+        "gulp-npm-module-publisher": "^3.0.0"
     },
     "repository": {
         "type": "git",
