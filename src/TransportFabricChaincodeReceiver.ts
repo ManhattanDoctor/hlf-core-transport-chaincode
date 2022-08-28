@@ -167,7 +167,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
 
     // --------------------------------------------------------------------------
     //
-    //  Recevie Message Methods
+    //  Receive Message Methods
     //
     // --------------------------------------------------------------------------
 
