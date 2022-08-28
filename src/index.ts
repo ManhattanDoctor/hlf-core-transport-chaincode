@@ -9,6 +9,7 @@ export * from './batch/TransportFabricStubBatch';
 export * from './batch/TransportFabricStubWrapper';
 //
 export * from './database/DatabaseManager';
+export * from './database/entity/EntityManager';
 //
 export * from './handler/TransportCommandFabricAsyncHandler';
 export * from './handler/TransportCommandFabricHandler';
