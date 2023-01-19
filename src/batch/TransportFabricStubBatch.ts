@@ -43,7 +43,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected async commitIfNeed(): Promise<void> {
-        if (!Transport.isCommandAsync(this.command) || !_.isNil(this.command.error)) {
+        if (Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)) {
             this.stateDestroy()
             return;
         }
