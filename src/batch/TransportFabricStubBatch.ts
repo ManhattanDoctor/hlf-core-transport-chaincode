@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
-import { ITransportCommand, ITransportEvent, Transport } from '@ts-core/common';
+import { ITransportCommand, ITransportEvent, ValidateUtil, Transport } from '@ts-core/common';
 import { StateProxy } from './StateProxy';
 import { TransportFabricStub } from '../stub/TransportFabricStub';
 import { IKeyValue } from '../stub/ITransportFabricStub';
@@ -14,8 +14,8 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    protected wrapper: TransportFabricStubWrapper;
     protected state: StateProxy;
+    protected wrapper: TransportFabricStubWrapper;
 
     // It needs for check response and commit temporary state
     public command: ITransportCommand<U>;
@@ -29,6 +29,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     constructor(transactionHash: string, transactionDate: Date, wrapper: TransportFabricStubWrapper, payload: ITransportFabricRequestPayload) {
         super(null, payload.id, payload.options, null);
         this.wrapper = wrapper;
+
         this.state = new StateProxy(this.getStateRawProxy);
 
         this._transactionHash = transactionHash;
@@ -41,31 +42,20 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    protected async stateCommitIfNeed(isError: boolean): Promise<void> {
-        if (isError) {
-            this.stateDestroy();
-            return;
-        }
-
+    protected async commit(): Promise<void> {
         for (let key of this.state.toRemove) {
             await this.wrapper.removeState(key);
         }
         for (let key of this.state.toPut.keys()) {
             await this.wrapper.putStateRaw(key, this.state.toPut.get(key));
         }
-        for (let item of this.state.events) {
-            await this.wrapper.dispatch(item);
-        }
-        this.stateDestroy();
+        this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
     }
 
-    protected stateDestroy = (): void => {
-        if (!_.isNil(this.state)) {
-            this.state.destroy();
-            this.state = null;
-        }
-        this.wrapper = null;
-    };
+    protected dispatchEvents(): void {
+        // do nothing, wrapper dispatch all events
+    }
+
 
     // --------------------------------------------------------------------------
     //
@@ -107,11 +97,10 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     }
 
     public async dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): Promise<void> {
-        this.state.dispatch(value, isNeedValidate);
-    }
-
-    public dispatchEvents(): void {
-        // do nothing, wrapper dispatchs all events
+        if (isNeedValidate) {
+            ValidateUtil.validate(value);
+        }
+        this.eventsToDispatch.push(value);
     }
 
     // --------------------------------------------------------------------------
@@ -124,10 +113,19 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         if (this.isDestroyed) {
             return;
         }
+
+        let isNeedCommit = Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)
+        if (isNeedCommit) {
+            this.commit();
+        }
+
         super.destroy();
-        this.stateCommitIfNeed(Transport.isCommandAsync(this.command) && !_.isNil(this.command.error));
+        
+        this.state.destroy();
+        this.state = null;
 
         this.command = null;
+        this.wrapper = null;
         this.getStateRawProxy = null;
     }
 }

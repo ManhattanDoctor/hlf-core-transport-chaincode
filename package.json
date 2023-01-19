@@ -1,6 +1,6 @@
 {
     "name": "@hlf-core/transport-chaincode",
-    "version": "3.0.3",
+    "version": "3.1.0",
     "description": "Hyperledger Fabric transport chaincode classes",
     "main": "./cjs/public-api.js",
     "module": "./esm/public-api.js",
@@ -16,7 +16,7 @@
     },
     "license": "ISC",
     "dependencies": {
-        "@hlf-core/transport-common": "^3.0.2",
+        "@hlf-core/transport-common": "^3.0.3",
         "fabric-shim": "^2.2.3",
         "reflect-metadata": "^0.1.13"
     },

@@ -60,7 +60,7 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
         if (ObjectUtil.hasOwnProperty(item, 'toDate')) {
             this._transactionDate = item.toDate();
         } else if (ObjectUtil.hasOwnProperties(item, ['seconds', 'nanos'])) {
-            this._transactionDate = new Date(item.seconds * DateUtil.MILISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILISECONDS_NANOSECOND));
+            this._transactionDate = new Date(item.seconds * DateUtil.MILLISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILISECONDS_NANOSECOND));
         }
     }
 
@@ -69,6 +69,20 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
         if (!_.isNil(this.options.signature)) {
             this._userPublicKey = this.options.signature.publicKey;
         }
+    }
+
+    protected dispatchEvents(): void {
+        if (_.isEmpty(this.eventsToDispatch)) {
+            return;
+        }
+
+        let item = {};
+        TransformUtil.fromClassMany(this.eventsToDispatch).forEach(event => item[event.uid] = event);
+        this.setEvent(Object.values(ObjectUtil.sortKeys(item, true)));
+    }
+
+    protected setEvent(item: any): void {
+        this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 
     // --------------------------------------------------------------------------
@@ -186,26 +200,11 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
         this.eventsToDispatch.push(value);
     }
 
-    // --------------------------------------------------------------------------
-    //
-    //  Public Methods
-    //
-    // --------------------------------------------------------------------------
-
-    public dispatchEvents(): void {
-        if (_.isEmpty(this.eventsToDispatch)) {
-            return;
-        }
-        let items = TransformUtil.fromJSONMany(TransformUtil.fromClassMany(this.eventsToDispatch));
-        this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(items), TransformUtil.ENCODING));
-    }
-
     public destroy(): void {
         if (this.isDestroyed) {
             return;
         }
         super.destroy();
-
         this.dispatchEvents();
 
         this._stub = null;
@@ -244,3 +243,4 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
         return this._transactionDate;
     }
 }
+

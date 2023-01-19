@@ -1,10 +1,10 @@
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
-import { ITransportEvent, ITransportReceiver } from '@ts-core/common';
+import { ITransportEvent, ExtendedError, TransformUtil, ObjectUtil, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub, Iterators } from 'fabric-shim';
 import * as _ from 'lodash';
 import { TransportFabricStub } from '../stub/TransportFabricStub';
 import { IKeyValue } from '../stub/ITransportFabricStub';
-import { StateProxy } from './StateProxy';
+import { GetStateRaw, StateProxy } from './StateProxy';
 
 export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
@@ -14,6 +14,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected state: StateProxy;
+    protected events: Map<string, Array<ITransportEvent<any>>>;
 
     // --------------------------------------------------------------------------
     //
@@ -24,7 +25,25 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     constructor(stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
         super(stub, requestId, options, transport);
         this.state = new StateProxy(this.getStateRawProxy);
+        this.events = new Map();
     }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Protected Methods
+    //
+    // --------------------------------------------------------------------------
+
+    protected dispatchEvents(): void {
+        if (_.isEmpty(this.eventsToDispatch)) {
+            return;
+        }
+        let item = {};
+        this.events.forEach((events, transactionHash) => item[transactionHash] = TransformUtil.fromClassMany(events));
+        this.setEvent(ObjectUtil.sortKeys(item, true));
+    }
+
+    protected getStateRawProxy: GetStateRaw = (item: string): Promise<string> => super.getStateRaw(item);
 
     // --------------------------------------------------------------------------
     //
@@ -32,17 +51,12 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    protected getStateRawProxy = (item: string): Promise<string> => super.getStateRaw(item);
-
     public async complete(): Promise<void> {
         for (let key of this.state.toRemove) {
             await super.removeState(key);
         }
         for (let key of this.state.toPut.keys()) {
             await super.putStateRaw(key, this.state.toPut.get(key));
-        }
-        for (let item of this.state.events) {
-            await super.dispatch(item);
         }
         this.destroy();
     }
@@ -71,8 +85,15 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         this.state.removeState(key);
     }
 
+    public async putEvent<T>(transactionHash: string, items: Array<ITransportEvent<T>>): Promise<void> {
+        if (this.events.has(transactionHash)) {
+            throw new ExtendedError(`Events for "${transactionHash}" already putted`);
+        }
+        this.events.set(transactionHash, items);
+    }
+
     public async dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): Promise<void> {
-        this.state.dispatch(value, isNeedValidate);
+        throw new ExtendedError(`Can't dispatch event directly, use TransportFabricStubBatch`);
     }
 
     public destroy(): void {
@@ -81,6 +102,9 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         }
         super.destroy();
         this.getStateRawProxy = null;
+
+        this.events.clear();
+        this.events = null;
 
         this.state.destroy();
         this.state = null;

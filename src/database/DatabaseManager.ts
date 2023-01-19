@@ -79,7 +79,6 @@ export class DatabaseManager extends LoggerWrapper {
             return;
         }
         super.destroy();
-
         this._stub = null;
     }
 

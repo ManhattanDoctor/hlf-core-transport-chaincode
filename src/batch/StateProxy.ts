@@ -9,11 +9,12 @@ export class StateProxy extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-    protected state: Map<string, string>;
-    protected _events: Array<ITransportEvent<any>>;
 
     protected _toPut: Map<string, string>;
     protected _toRemove: Array<string>;
+
+    protected state: Map<string, string>;
+    protected getStateRaw: GetStateRaw;
 
     // --------------------------------------------------------------------------
     //
@@ -21,11 +22,11 @@ export class StateProxy extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-    constructor(protected getStateRaw: (key: string) => Promise<string>) {
+    constructor(getStateRaw: GetStateRaw) {
         super();
 
         this.state = new Map();
-        this._events = new Array();
+        this.getStateRaw = getStateRaw;
 
         this._toPut = new Map();
         this._toRemove = new Array();
@@ -56,13 +57,6 @@ export class StateProxy extends Destroyable {
                 items.splice(i, 1, item);
             }
         }
-    }
-
-    public dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): void {
-        if (isNeedValidate) {
-            ValidateUtil.validate(value);
-        }
-        this._events.push(value);
     }
 
     public async getState(key: string): Promise<string> {
@@ -116,9 +110,6 @@ export class StateProxy extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-    public get events(): Array<ITransportEvent<any>> {
-        return this._events;
-    }
 
     public get toRemove(): Array<string> {
         return this._toRemove;
@@ -128,3 +119,5 @@ export class StateProxy extends Destroyable {
         return this._toPut;
     }
 }
+
+export type GetStateRaw = (key: string) => Promise<string>;
