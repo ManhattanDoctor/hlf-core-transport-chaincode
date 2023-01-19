@@ -113,14 +113,12 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         if (this.isDestroyed) {
             return;
         }
-
-        let isNeedCommit = Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)
+        let isNeedCommit = Transport.isCommandAsync(this.command) && _.isNil(this.command.error)
         if (isNeedCommit) {
             this.commit();
         }
-
         super.destroy();
-        
+
         this.state.destroy();
         this.state = null;
 

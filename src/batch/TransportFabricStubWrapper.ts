@@ -85,7 +85,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         this.state.removeState(key);
     }
 
-    public async putEvent<T>(transactionHash: string, items: Array<ITransportEvent<T>>): Promise<void> {
+    public putEvent<T>(transactionHash: string, items: Array<ITransportEvent<T>>): void {
         if (this.events.has(transactionHash)) {
             throw new ExtendedError(`Events for "${transactionHash}" already putted`);
         }
