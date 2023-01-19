@@ -42,7 +42,11 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    protected async commit(): Promise<void> {
+    protected async commitIfNeed(): Promise<void> {
+        if (!Transport.isCommandAsync(this.command) || !_.isNil(this.command.error)) {
+            this.stateDestroy()
+            return;
+        }
         for (let key of this.state.toRemove) {
             await this.wrapper.removeState(key);
         }
@@ -50,12 +54,20 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
             await this.wrapper.putStateRaw(key, this.state.toPut.get(key));
         }
         this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
+        this.stateDestroy();
+    }
+
+    protected stateDestroy(): void {
+        if (!_.isNil(this.state)) {
+            this.state.destroy();
+            this.state = null;
+        }
+        this.wrapper = null;
     }
 
     protected dispatchEvents(): void {
         // do nothing, wrapper dispatch all events
     }
-
 
     // --------------------------------------------------------------------------
     //
@@ -113,17 +125,10 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         if (this.isDestroyed) {
             return;
         }
-        let isNeedCommit = Transport.isCommandAsync(this.command) && _.isNil(this.command.error)
-        if (isNeedCommit) {
-            this.commit();
-        }
+        this.commitIfNeed();
         super.destroy();
 
-        this.state.destroy();
-        this.state = null;
-
         this.command = null;
-        this.wrapper = null;
         this.getStateRawProxy = null;
     }
 }
