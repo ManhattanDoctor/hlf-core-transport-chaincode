@@ -35,7 +35,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected dispatchEvents(): void {
-        if (_.isEmpty(this.eventsToDispatch)) {
+        if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
         let item = {};
