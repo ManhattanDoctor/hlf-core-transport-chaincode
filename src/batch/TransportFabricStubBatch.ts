@@ -53,7 +53,9 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         for (let key of this.state.toPut.keys()) {
             await this.wrapper.putStateRaw(key, this.state.toPut.get(key));
         }
-        this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
+        if (!_.isEmpty(this.eventsToDispatch)) {
+            this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
+        }
         this.stateDestroy();
     }
 
