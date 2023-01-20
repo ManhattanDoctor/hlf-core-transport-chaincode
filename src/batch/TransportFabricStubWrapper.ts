@@ -40,7 +40,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
             return;
         }
         let item = {};
-        console.log('Settings events', this.events);
+        console.log('Settings events-', this.events);
         this.events.forEach((events, transactionHash) => item[transactionHash] = TransformUtil.fromClassMany(events));
         this.setEvent(ObjectUtil.sortKeys(item, true));
     }
