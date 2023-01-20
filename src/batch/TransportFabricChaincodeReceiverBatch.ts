@@ -65,6 +65,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             let result = {} as any;
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
+                console.log('result is');
                 await wrapper.destroyAsync();
             } catch (error) {
                 error = ExtendedError.create(error);
@@ -75,6 +76,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             }
         }
 
+        console.log('removing states...');
         for (let item of items) {
             await stub.removeState(item.key);
         }

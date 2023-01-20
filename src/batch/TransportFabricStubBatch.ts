@@ -62,7 +62,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         // do nothing, wrapper dispatch all events
     }
 
-    protected _destroy():void {
+    protected _destroy(): void {
         if (this.isDestroyed) {
             return;
         }
