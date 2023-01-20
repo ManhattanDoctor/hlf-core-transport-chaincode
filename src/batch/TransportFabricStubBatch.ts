@@ -131,7 +131,9 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
 
     public async destroyAsync(): Promise<void> {
         if (!this.isDestroyed) {
+            this.log('TransportFabricStubBatch destroyAsync and commit');
             await this.commit();
+            this.log('TransportFabricStubBatch commited');
         }
         return super.destroyAsync();
     }
