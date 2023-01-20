@@ -6,7 +6,7 @@ import { DatabaseManager } from '../database/DatabaseManager';
 import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
-import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil } from '@ts-core/common';
+import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
 import { ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
@@ -123,6 +123,21 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     protected isNonSignedCommand<U>(command: ITransportCommand<U>): boolean {
         return !this.isCommandBatch(command) ? super.isNonSignedCommand(command) : false;
     }
+
+    protected logCommand<U>(command: ITransportCommand<U>, type: TransportLogType): void {
+        if (this.isCommandBatch(command)) {
+            switch (type) {
+                case TransportLogType.REQUEST_SENDED:
+                case TransportLogType.REQUEST_RECEIVED:
+                case TransportLogType.RESPONSE_SENDED:
+                case TransportLogType.RESPONSE_RECEIVED:
+                case TransportLogType.RESPONSE_NO_REPLY:
+                    return;
+            }
+        }
+        return super.logCommand(command, type);
+    }
+
 
     // --------------------------------------------------------------------------
     //
