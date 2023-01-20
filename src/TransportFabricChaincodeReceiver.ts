@@ -7,7 +7,6 @@ import {
     ITransportEvent,
     ITransportRequestStorage,
     Transport,
-    IDestroyable,
     ISignature,
     TransportLogType,
     ITransportCryptoManager,
