@@ -35,6 +35,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected dispatchEvents(): void {
+        console.log('dispatchEvents', this.events.size);
         if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
@@ -101,6 +102,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         if (this.isDestroyed) {
             return;
         }
+        console.log('destroy');
         super.destroy();
         this.getStateRawProxy = null;
 
