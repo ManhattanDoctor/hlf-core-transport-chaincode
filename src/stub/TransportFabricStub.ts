@@ -82,6 +82,7 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
     }
 
     protected setEvent(item: any): void {
+        console.log('setEvent', TRANSPORT_CHAINCODE_EVENT);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 
