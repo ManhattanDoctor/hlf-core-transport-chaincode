@@ -65,9 +65,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             let result = {} as any;
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
-                console.log('result is');
                 await wrapper.destroyAsync();
-                console.log('wrapper destroyAsynced');
             } catch (error) {
                 error = ExtendedError.create(error);
                 this.error(`Unable to execute batched command: ${error.message}`);
@@ -77,11 +75,10 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             }
         }
 
-        console.log('removing states...');
         for (let item of items) {
             await stub.removeState(item.key);
         }
-        console.log('send response');
+        this.log(`${items.length} commands batched`);
         return ObjectUtil.sortKeys(response);
     }
 

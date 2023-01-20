@@ -40,21 +40,17 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
             return;
         }
         let item = {};
-        console.log('Settings events', this.events);
         this.events.forEach((events, transactionHash) => item[transactionHash] = TransformUtil.fromClassMany(events));
         this.setEvent(ObjectUtil.sortKeys(item, true));
     }
 
     protected async commit(): Promise<void> {
         for (let key of this.state.toRemove) {
-            console.log('Remove state', key);
             await super.removeState(key);
         }
         for (let key of this.state.toPut.keys()) {
-            console.log('Put state', key);
             await super.putStateRaw(key, this.state.toPut.get(key));
         }
-        console.log('committed');
     }
 
     protected _destroy(): void {
@@ -62,7 +58,6 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
             return;
         }
         super._destroy();
-        console.log('destroy');
 
         this.events.clear();
         this.events = null;
@@ -111,9 +106,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     }
 
     public async destroyAsync(): Promise<void> {
-        console.log('called Wrapper destroyAsync');
         if (!this.isDestroyed) {
-            console.log('called commit');
             await this.commit();
         }
         return super.destroyAsync();

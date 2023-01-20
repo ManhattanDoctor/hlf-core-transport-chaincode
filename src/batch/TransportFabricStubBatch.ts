@@ -46,7 +46,6 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         if (Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)) {
             return;
         }
-        console.log('eventsToDispatch', this.eventsToDispatch.length);
         if (!_.isEmpty(this.eventsToDispatch)) {
             this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
         }
