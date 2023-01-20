@@ -1,9 +1,10 @@
 import { ITransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { ExtendedError, ObservableData, TransformUtil, ILogger, LoggerWrapper } from '@ts-core/common';
+import { ExtendedError, ObservableData, TransformUtil, ILogger, LoggerWrapper, LoggerLevel } from '@ts-core/common';
 import { Shim, ChaincodeInterface, ChaincodeResponse, ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { TransportFabricChaincodeReceiver } from './TransportFabricChaincodeReceiver';
+import * as internalLogger from 'fabric-shim/lib/logger';
 
 export abstract class TransportFabricChaincode<T> extends LoggerWrapper implements ChaincodeInterface {
     // --------------------------------------------------------------------------
@@ -75,6 +76,25 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
 
     public get events(): Observable<ObservableData<T | TransportFabricChaincodeEvent, ITransportFabricChaincodeEventData>> {
         return this.observer.asObservable();
+    }
+
+    public set internalLoggerLevel(level: LoggerLevel) {
+        let value = 'INFO';
+        switch (level) {
+            case LoggerLevel.ERROR:
+                value = 'ERROR';
+                break;
+            case LoggerLevel.DEBUG:
+                value = 'DEBUG';
+                break;
+            case LoggerLevel.WARN:
+                value = 'WARNING';
+                break;
+            case LoggerLevel.NONE:
+                value = 'CRITICAL';
+                break;
+        }
+        internalLogger.setLevel(value);
     }
 
     public abstract get name(): string;

@@ -6,7 +6,7 @@ import { DatabaseManager } from '../database/DatabaseManager';
 import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
-import { DateUtil, ITransportCommand, ExtendedError, TransformUtil } from '@ts-core/common';
+import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil } from '@ts-core/common';
 import { ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
@@ -32,12 +32,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     //
     // --------------------------------------------------------------------------
 
-    protected async executeCommand<U>(
-        stubOriginal: ChaincodeStub,
-        payload: TransportFabricRequestPayload<U>,
-        stub: ITransportFabricStub,
-        command: ITransportCommand<U>
-    ): Promise<void> {
+    protected async executeCommand<U>(stubOriginal: ChaincodeStub, payload: TransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
         if (payload.isReadonly) {
             return super.executeCommand(stubOriginal, payload, stub, command);
         }
@@ -48,7 +43,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 await this.batchValidate(payload, stub);
                 result = await this.batch(stubOriginal, stub, payload);
             } else {
-                await this.batchAdd(payload, stub, command);
+                result = await this.batchAdd(payload, stub, command);
             }
         } catch (error) {
             result = ExtendedError.create(error);
@@ -56,24 +51,21 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         this.complete(command, result);
     }
 
-    protected async batch<U>(
-        stubOriginal: ChaincodeStub,
-        stub: ITransportFabricStub,
-        payload: TransportFabricRequestPayload<U>
-    ): Promise<ITransportFabricBatchDto> {
+    protected async batch<U>(stubOriginal: ChaincodeStub, stub: ITransportFabricStub, payload: TransportFabricRequestPayload<U>): Promise<ITransportFabricBatchDto> {
         let database = new DatabaseManager(this.logger, stub);
         let items = await database.getKV(TransportFabricChaincodeReceiverBatch.PREFIX);
         if (_.isEmpty(items)) {
             throw new ExtendedError(`No commands to batch`);
         }
 
-        let wrapper = new TransportFabricStubWrapper(stubOriginal, payload.id, payload.options, this);
+        let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
 
         for (let item of items) {
             let result = {} as any;
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
+                await wrapper.destroyAsync();
             } catch (error) {
                 error = ExtendedError.create(error);
                 this.error(`Unable to execute batched command: ${error.message}`);
@@ -82,11 +74,11 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 response[this.batchKeyToHash(item.key)] = result;
             }
         }
-        await wrapper.complete();
+
         for (let item of items) {
             await stub.removeState(item.key);
         }
-        return response;
+        return ObjectUtil.sortKeys(response);
     }
 
     protected async batchAdd<U>(payload: TransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
@@ -95,13 +87,9 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         await stub.putState(this.toBatchKey(stub, command), payload);
     }
 
-    protected async batchCommand<U>(
-        item: IKeyValue,
-        stubOriginal: ChaincodeStub,
-        wrapper: TransportFabricStubWrapper
-    ): Promise<TransportFabricResponsePayload<U>> {
+    protected async batchCommand<U>(item: IKeyValue, stubOriginal: ChaincodeStub, wrapper: TransportFabricStubWrapper): Promise<TransportFabricResponsePayload<U>> {
         let payload = TransformUtil.toClass<ITransportFabricRequestPayload<U>>(TransportFabricRequestPayload, TransformUtil.toJSON(item.value));
-        let stub = new TransportFabricStubBatch(this.batchKeyToHash(item.key), this.batchKeyToDate(item.key), wrapper, payload);
+        let stub = new TransportFabricStubBatch(this.logger, this.batchKeyToHash(item.key), this.batchKeyToDate(item.key), wrapper, payload);
         let command = this.createCommand(payload, stub);
         stub.command = command;
 

@@ -1,4 +1,4 @@
-import { Destroyable, ITransportEvent, ArrayUtil, ValidateUtil } from '@ts-core/common';
+import { Destroyable, ArrayUtil } from '@ts-core/common';
 import * as _ from 'lodash';
 import { IKeyValue } from '../stub';
 
@@ -8,7 +8,6 @@ export class StateProxy extends Destroyable {
     //  Properties
     //
     // --------------------------------------------------------------------------
-
 
     protected _toPut: Map<string, string>;
     protected _toRemove: Array<string>;
@@ -110,13 +109,12 @@ export class StateProxy extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-
-    public get toRemove(): Array<string> {
-        return this._toRemove;
-    }
-
     public get toPut(): Map<string, string> {
         return this._toPut;
+    }
+    
+    public get toRemove(): Array<string> {
+        return this._toRemove;
     }
 }
 

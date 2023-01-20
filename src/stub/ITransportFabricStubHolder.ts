@@ -1,10 +1,11 @@
 import { ITransportFabricStub } from './ITransportFabricStub';
-import { IDestroyable, ExtendedError } from '@ts-core/common';
+import { ExtendedError } from '@ts-core/common';
 import * as _ from 'lodash';
 import 'reflect-metadata';
 
-export interface ITransportFabricStubHolder extends IDestroyable {
+export interface ITransportFabricStubHolder {
     readonly stub: ITransportFabricStub;
+    destroyAsync(): Promise<void>;
 }
 
 // --------------------------------------------------------------------------

@@ -2,9 +2,10 @@ import { ITransportEvent, ITransportReceiver, TransformUtil, Destroyable, IPageB
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
 import * as _ from 'lodash';
 import { IKeyValue, ITransportFabricStub } from './ITransportFabricStub';
+import { LoggerWrapper, ILogger, ExtendedError } from '@ts-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
 
-export class TransportFabricStub extends Destroyable implements ITransportFabricStub {
+export class TransportFabricStub extends LoggerWrapper implements ITransportFabricStub {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -30,8 +31,8 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
     //
     // --------------------------------------------------------------------------
 
-    constructor(stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
-        super();
+    constructor(logger: ILogger, stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
+        super(logger);
         this._stub = stub;
         this._requestId = requestId;
 
@@ -84,6 +85,19 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
     protected setEvent(item: any): void {
         console.log('setEvent', TRANSPORT_CHAINCODE_EVENT);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
+    }
+
+    protected _destroy(): void {
+        if (this.isDestroyed) {
+            return;
+        }
+        super.destroy();
+        this.dispatchEvents();
+
+        this._stub = null;
+        this.options = null;
+        this.transport = null;
+        this.eventsToDispatch = null;
     }
 
     // --------------------------------------------------------------------------
@@ -201,17 +215,12 @@ export class TransportFabricStub extends Destroyable implements ITransportFabric
         this.eventsToDispatch.push(value);
     }
 
-    public destroy(): void {
-        if (this.isDestroyed) {
-            return;
-        }
-        super.destroy();
-        this.dispatchEvents();
+    public async destroyAsync(): Promise<void> {
+        return this._destroy();
+    }
 
-        this._stub = null;
-        this.options = null;
-        this.transport = null;
-        this.eventsToDispatch = null;
+    public destroy(): void {
+        throw new ExtendedError(`Call "destroyAsync" instead`);
     }
 
     // --------------------------------------------------------------------------

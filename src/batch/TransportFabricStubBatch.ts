@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
-import { ITransportCommand, ITransportEvent, ValidateUtil, Transport } from '@ts-core/common';
+import { ITransportCommand, ITransportEvent, ValidateUtil, Transport, ILogger } from '@ts-core/common';
 import { StateProxy } from './StateProxy';
 import { TransportFabricStub } from '../stub/TransportFabricStub';
 import { IKeyValue } from '../stub/ITransportFabricStub';
@@ -26,8 +26,8 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    constructor(transactionHash: string, transactionDate: Date, wrapper: TransportFabricStubWrapper, payload: ITransportFabricRequestPayload) {
-        super(null, payload.id, payload.options, null);
+    constructor(logger: ILogger, transactionHash: string, transactionDate: Date, wrapper: TransportFabricStubWrapper, payload: ITransportFabricRequestPayload) {
+        super(logger, null, payload.id, payload.options, null);
         this.wrapper = wrapper;
 
         this.state = new StateProxy(this.getStateRawProxy);
@@ -42,10 +42,8 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    protected async commitIfNeed(): Promise<void> {
-        console.log('commitIfNeed', Transport.isCommandAsync(this.command) && !_.isNil(this.command.error));
+    protected async commit(): Promise<void> {
         if (Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)) {
-            this.stateDestroy()
             return;
         }
         console.log('eventsToDispatch', this.eventsToDispatch.length);
@@ -58,19 +56,26 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         for (let key of this.state.toPut.keys()) {
             await this.wrapper.putStateRaw(key, this.state.toPut.get(key));
         }
-        this.stateDestroy();
-    }
-
-    protected stateDestroy(): void {
-        if (!_.isNil(this.state)) {
-            this.state.destroy();
-            this.state = null;
-        }
-        this.wrapper = null;
     }
 
     protected dispatchEvents(): void {
         // do nothing, wrapper dispatch all events
+    }
+
+    protected _destroy():void {
+        if (this.isDestroyed) {
+            return;
+        }
+        super._destroy();
+
+        if (!_.isNil(this.state)) {
+            this.state.destroy();
+            this.state = null;
+        }
+
+        this.command = null;
+        this.wrapper = null;
+        this.getStateRawProxy = null;
     }
 
     // --------------------------------------------------------------------------
@@ -125,14 +130,11 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    public destroy(): void {
-        if (this.isDestroyed) {
-            return;
+    public async destroyAsync(): Promise<void> {
+        if (!this.isDestroyed) {
+            await this.commit();
         }
-        this.commitIfNeed();
-        super.destroy();
-
-        this.command = null;
-        this.getStateRawProxy = null;
+        return super.destroyAsync();
     }
+
 }

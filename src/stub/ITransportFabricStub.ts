@@ -1,7 +1,7 @@
 import { Iterators, StateQueryResponse } from 'fabric-shim';
-import { IPageBookmark, IPaginationBookmark, ClassType, ITransportEvent, IDestroyable } from '@ts-core/common';
+import { IPageBookmark, IPaginationBookmark, ClassType, ITransportEvent } from '@ts-core/common';
 
-export interface ITransportFabricStub extends IDestroyable {
+export interface ITransportFabricStub {
     // readonly stub: ChaincodeStub;
 
     readonly userId: string;
@@ -32,7 +32,7 @@ export interface ITransportFabricStub extends IDestroyable {
     removeState(key: string): Promise<void>;
 
     dispatch<T>(event: ITransportEvent<T>): Promise<void>;
-    destroy(): void;
+    destroyAsync(): Promise<void>;
 }
 
 export interface IKeyValue {

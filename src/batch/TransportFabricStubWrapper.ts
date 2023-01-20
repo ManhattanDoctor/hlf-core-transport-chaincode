@@ -1,5 +1,5 @@
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
-import { ITransportEvent, ExtendedError, TransformUtil, ObjectUtil, ITransportReceiver } from '@ts-core/common';
+import { ITransportEvent, ExtendedError, ILogger, TransformUtil, ObjectUtil, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub, Iterators } from 'fabric-shim';
 import * as _ from 'lodash';
 import { TransportFabricStub } from '../stub/TransportFabricStub';
@@ -22,8 +22,8 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    constructor(stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
-        super(stub, requestId, options, transport);
+    constructor(logger: ILogger, stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
+        super(logger, stub, requestId, options, transport);
         this.state = new StateProxy(this.getStateRawProxy);
         this.events = new Map();
     }
@@ -35,14 +35,42 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected dispatchEvents(): void {
-        console.log('dispatchEvents', this.events.size);
+        this.log('dispatchEvents', this.events.size);
         if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
         let item = {};
-        console.log('Settings events-', this.events);
+        console.log('Settings events', this.events);
         this.events.forEach((events, transactionHash) => item[transactionHash] = TransformUtil.fromClassMany(events));
         this.setEvent(ObjectUtil.sortKeys(item, true));
+    }
+
+    protected async commit(): Promise<void> {
+        for (let key of this.state.toRemove) {
+            console.log('Remove state', key);
+            await super.removeState(key);
+        }
+        for (let key of this.state.toPut.keys()) {
+            console.log('Put state', key);
+            await super.putStateRaw(key, this.state.toPut.get(key));
+        }
+        console.log('committed');
+    }
+
+    protected _destroy(): void {
+        if (this.isDestroyed) {
+            return;
+        }
+        super._destroy();
+        console.log('destroy');
+
+        this.events.clear();
+        this.events = null;
+
+        this.state.destroy();
+        this.state = null;
+
+        this.getStateRawProxy = null;
     }
 
     protected getStateRawProxy: GetStateRaw = (item: string): Promise<string> => super.getStateRaw(item);
@@ -50,22 +78,6 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
     //
     //  Public Methods
-    //
-    // --------------------------------------------------------------------------
-
-    public async complete(): Promise<void> {
-        for (let key of this.state.toRemove) {
-            await super.removeState(key);
-        }
-        for (let key of this.state.toPut.keys()) {
-            await super.putStateRaw(key, this.state.toPut.get(key));
-        }
-        this.destroy();
-    }
-
-    // --------------------------------------------------------------------------
-    //
-    //  Public Override Methods
     //
     // --------------------------------------------------------------------------
 
@@ -98,18 +110,10 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         throw new ExtendedError(`Can't dispatch event directly, use TransportFabricStubBatch`);
     }
 
-    public destroy(): void {
-        if (this.isDestroyed) {
-            return;
+    public async destroyAsync(): Promise<void> {
+        if (!this.isDestroyed) {
+            await this.commit();
         }
-        console.log('destroy');
-        super.destroy();
-        this.getStateRawProxy = null;
-
-        this.events.clear();
-        this.events = null;
-
-        this.state.destroy();
-        this.state = null;
+        return super.destroyAsync();
     }
 }

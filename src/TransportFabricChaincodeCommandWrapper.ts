@@ -40,9 +40,9 @@ export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements
         }
     }
 
-    public destroy(): void {
+    public async destroyAsync(): Promise<void> {
         if (!_.isNil(this.stub)) {
-            this.stub.destroy();
+            await this.stub.destroyAsync();
             this._stub = null;
         }
         this.command = null;
