@@ -48,15 +48,15 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
             this.stateDestroy()
             return;
         }
+        console.log('eventsToDispatch', this.eventsToDispatch.length);
+        if (!_.isEmpty(this.eventsToDispatch)) {
+            this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
+        }
         for (let key of this.state.toRemove) {
             await this.wrapper.removeState(key);
         }
         for (let key of this.state.toPut.keys()) {
             await this.wrapper.putStateRaw(key, this.state.toPut.get(key));
-        }
-        console.log('eventsToDispatch', this.eventsToDispatch.length);
-        if (!_.isEmpty(this.eventsToDispatch)) {
-            this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
         }
         this.stateDestroy();
     }
