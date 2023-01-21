@@ -86,7 +86,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         if (!(command instanceof TransportFabricChaincodeCommandWrapper<U, V>)) {
             throw new ExtendedError('Command must be instance of "TransportFabricChaincodeCommandWrapper"');
         }
-        
+
         let request = this.requests.get(command.id) as ITransportFabricRequestStorage;
         this.requests.delete(command.id);
 
@@ -108,7 +108,10 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         this.logCommand(command, request.isNeedReply ? TransportLogType.RESPONSE_SENDED : TransportLogType.RESPONSE_NO_REPLY);
 
         let payload = this.createResponsePayload(command);
-        command.destroyAsync().finally(() => handler.resolve(payload));
+        command.destroyAsync().then(() => {
+            console.log('Command destroyed');
+            handler.resolve(payload);
+        });
     }
 
     public wait<U>(command: ITransportCommand<U>): void {

@@ -106,11 +106,8 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     }
 
     public async destroyAsync(): Promise<void> {
-        if (!this.isDestroyed) {
-            this.log('destroyAsync and commit');
-            await this.commit();
-            this.log('commited');
-        }
+        await this.commit();
+        this.log('TransportFabricStubWrapper: committed');
         return super.destroyAsync();
     }
 }
