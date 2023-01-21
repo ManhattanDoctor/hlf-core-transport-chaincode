@@ -78,7 +78,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             this.requests.delete(command.id);
             return;
         }
-        await this.executeCommand(chaincode, payload, stub, command);
+        this.executeCommand(chaincode, payload, stub, command);
         return request.handler.promise;
     }
 
