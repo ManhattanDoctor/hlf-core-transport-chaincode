@@ -37,6 +37,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             return super.executeCommand(stubOriginal, payload, stub, command);
         }
 
+        console.log('Execute: started');
         let result = null;
         try {
             if (this.isCommandBatch(payload)) {
@@ -48,6 +49,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         } catch (error) {
             result = ExtendedError.create(error);
         }
+        console.log('Execute: complete');
         this.complete(command, result);
     }
 

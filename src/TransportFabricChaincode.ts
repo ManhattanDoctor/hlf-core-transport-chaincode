@@ -40,7 +40,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
 
     public async Invoke(stub: ChaincodeStub): Promise<ChaincodeResponse> {
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_STARTED, { stub }));
-
+        console.log('Invoke: started');
         let response = await this.transport.invoke(stub);
 
         let event = { stub, response };
@@ -53,7 +53,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
             this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_COMPLETE, event));
         }
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_FINISHED, event));
-
+        console.log('Invoke: finished');
         let content = this.getContent(response);
         return isError ? Shim.error(content) : Shim.success(content);
     }
