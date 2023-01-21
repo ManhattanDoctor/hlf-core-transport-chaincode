@@ -91,7 +91,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         this.requests.delete(command.id);
 
         if (_.isNil(request)) {
-            this.error(`Unable to complete command "${command.name}", probably command was already completed`);
+            this.warn(`Unable to complete command "${command.name}", probably command was already completed`);
             return;
         }
 
@@ -108,10 +108,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         this.logCommand(command, request.isNeedReply ? TransportLogType.RESPONSE_SENDED : TransportLogType.RESPONSE_NO_REPLY);
 
         let payload = this.createResponsePayload(command);
-        command.destroyAsync().then(() => {
-            console.log('Command destroyed');
-            handler.resolve(payload);
-        });
+        command.destroyAsync().then(() => handler.resolve(payload));
     }
 
     public wait<U>(command: ITransportCommand<U>): void {
