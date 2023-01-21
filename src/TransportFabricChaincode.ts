@@ -58,6 +58,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         return isError ? Shim.error(content) : Shim.success(content);
     }
 
+    
     // --------------------------------------------------------------------------
     //
     // 	Protected Methods
