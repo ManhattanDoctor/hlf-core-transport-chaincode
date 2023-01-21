@@ -45,6 +45,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         let event = { stub, response };
         let isHasResponse = !_.isNil(response);
 
+        console.log('123', response);
         let isError = isHasResponse && ExtendedError.instanceOf(response.response);
         if (isError) {
             this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_ERROR, event));
@@ -53,6 +54,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         }
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_FINISHED, event));
         let content = this.getContent(response);
+        console.log('Content', content);
         return isError ? Shim.error(content) : Shim.success(content);
     }
 
