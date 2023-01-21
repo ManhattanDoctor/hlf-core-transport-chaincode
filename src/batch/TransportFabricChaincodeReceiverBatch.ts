@@ -37,7 +37,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             return super.executeCommand(stubOriginal, payload, stub, command);
         }
 
-        console.log('Execute: started');
         let result = null;
         try {
             if (this.isCommandBatch(payload)) {
@@ -49,7 +48,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         } catch (error) {
             result = ExtendedError.create(error);
         }
-        console.log('Execute: complete');
         this.complete(command, result);
     }
 
@@ -67,7 +65,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             let result = {} as any;
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
-                await wrapper.destroyAsync();
             } catch (error) {
                 error = ExtendedError.create(error);
                 this.error(`Unable to execute batched command: ${error.message}`);
@@ -76,7 +73,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 response[this.batchKeyToHash(item.key)] = result;
             }
         }
-
+        await wrapper.destroyAsync();
         for (let item of items) {
             await stub.removeState(item.key);
         }
@@ -96,7 +93,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let command = this.createCommand(payload, stub);
         stub.command = command;
 
-        
         console.log(`Start batch: ${command.name}`);
         let request = this.checkRequestStorage(payload, stub, command);
         super.executeCommand(stubOriginal, payload, stub, command);
