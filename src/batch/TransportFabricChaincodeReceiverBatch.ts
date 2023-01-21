@@ -96,6 +96,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let command = this.createCommand(payload, stub);
         stub.command = command;
 
+        
         console.log(`Start batch: ${command.name}`);
         let request = this.checkRequestStorage(payload, stub, command);
         super.executeCommand(stubOriginal, payload, stub, command);
