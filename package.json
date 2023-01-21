@@ -1,6 +1,6 @@
 {
     "name": "@hlf-core/transport-chaincode",
-    "version": "3.1.26",
+    "version": "3.1.27",
     "description": "Hyperledger Fabric transport chaincode classes",
     "main": "./cjs/public-api.js",
     "module": "./esm/public-api.js",
