@@ -65,8 +65,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
 
     protected getContent<V>(response: ITransportFabricResponsePayload<V>, isError: boolean): Buffer {
         if (isError) {
-            // fabric-shim has bug. According to interface shim expects buffer on error, but in fact 
-            // works only with string, waiting fix this in future versions
+            // fabric-shim has bug. According to the interface shim expects buffer on error, but in fact works with string
             let item = !_.isNil(response) ? TransformUtil.fromJSON(TransformUtil.fromClass(response)) : '';
             return item as any;
         }

@@ -58,8 +58,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             throw new ExtendedError(`No commands to batch`);
         }
 
-        console.log(`Start batching...`);
-
         let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
         for (let item of items) {
@@ -78,7 +76,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         for (let item of items) {
             await stub.removeState(item.key);
         }
-        console.log(`Finish batching (${items.length})`);
         return ObjectUtil.sortKeys(response, true);
     }
 
