@@ -35,7 +35,6 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected dispatchEvents(): void {
-        this.log('dispatchEvents', this.events.size);
         if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
@@ -107,7 +106,6 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
 
     public async destroyAsync(): Promise<void> {
         await this.commit();
-        this.log('TransportFabricStubWrapper: committed');
         return super.destroyAsync();
     }
 }
