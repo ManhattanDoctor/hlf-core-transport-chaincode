@@ -45,7 +45,6 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         let event = { stub, response };
         let isHasResponse = !_.isNil(response);
 
-        console.log('123', response);
         let isError = isHasResponse && ExtendedError.instanceOf(response.response);
         if (isError) {
             this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_ERROR, event));
@@ -53,19 +52,24 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
             this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_COMPLETE, event));
         }
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_FINISHED, event));
-        let content = this.getContent(response);
-        console.log('Content', content);
+
+        let content = this.getContent(response, isError);
         return isError ? Shim.error(content) : Shim.success(content);
     }
 
-    
     // --------------------------------------------------------------------------
     //
     // 	Protected Methods
     //
     // --------------------------------------------------------------------------
 
-    protected getContent<V>(response: ITransportFabricResponsePayload<V>): Buffer {
+    protected getContent<V>(response: ITransportFabricResponsePayload<V>, isError: boolean): Buffer {
+        if (isError) {
+            // fabric-shim has bug. According to interface shim expects buffer on error, but in fact 
+            // works only with string, waiting fix this in future versions
+            let item = !_.isNil(response) ? TransformUtil.fromJSON(TransformUtil.fromClass(response)) : '';
+            return item as any;
+        }
         return !_.isNil(response) ? TransformUtil.fromClassBuffer(response) : Buffer.from('');
     }
 

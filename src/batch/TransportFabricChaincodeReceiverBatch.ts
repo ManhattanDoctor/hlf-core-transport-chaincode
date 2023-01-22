@@ -62,7 +62,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
 
         let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
-
         for (let item of items) {
             let result = {} as any;
             try {
@@ -80,7 +79,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             await stub.removeState(item.key);
         }
         console.log(`Finish batching (${items.length})`);
-        return ObjectUtil.sortKeys(response);
+        return ObjectUtil.sortKeys(response, true);
     }
 
     protected async batchAdd<U>(payload: TransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
