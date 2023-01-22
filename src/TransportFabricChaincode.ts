@@ -53,6 +53,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         }
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_FINISHED, event));
 
+        // fabric-shim bug, according to the interface shim expects buffer on error, but in fact works with string
         let content = this.getContent(response, isError);
         return isError ? Shim.error(content) : Shim.success(content);
     }
@@ -65,9 +66,7 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
 
     protected getContent<V>(response: ITransportFabricResponsePayload<V>, isError: boolean): Buffer {
         if (isError) {
-            // fabric-shim has bug. According to the interface shim expects buffer on error, but in fact works with string
-            let item = !_.isNil(response) ? TransformUtil.fromJSON(TransformUtil.fromClass(response)) : '';
-            return item as any;
+            return (!_.isNil(response) ? TransformUtil.fromClassString(response) : '') as any;
         }
         return !_.isNil(response) ? TransformUtil.fromClassBuffer(response) : Buffer.from('');
     }
