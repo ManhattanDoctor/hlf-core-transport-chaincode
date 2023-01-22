@@ -7,7 +7,7 @@ import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
 import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
-import { ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
+import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
     // --------------------------------------------------------------------------
@@ -161,10 +161,9 @@ export interface ITransportFabricChaincodeSettingsBatch extends ITransportFabric
     batch: ITransportFabricSettingsBatch;
 }
 
-export interface ITransportFabricSettingsBatch {
+export interface ITransportFabricSettingsBatch extends IChaincodeBatchSettings {
+    timeout: number;
     algorithm: string;
     publicKey: string;
-
-    timeout?: number;
-    privateKey?: string;
+    privateKey: string;
 }
