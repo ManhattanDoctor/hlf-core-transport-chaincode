@@ -1,7 +1,7 @@
 import { ITransportEvent, ITransportReceiver, TransformUtil, Destroyable, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
 import * as _ from 'lodash';
-import { IKeyValue, ITransportFabricStub } from './ITransportFabricStub';
+import { IKeyValue, IPutStateOptions, ITransportFabricStub } from './ITransportFabricStub';
 import { LoggerWrapper, ILogger, ExtendedError } from '@ts-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
 
@@ -109,16 +109,12 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
         return !_.isNil(await this.getStateRaw(key));
     }
 
-    public async getState<U>(key: string, type: ClassType<U> = null, isNeedValidate: boolean = true): Promise<U> {
+    public async getState<U>(key: string, type: ClassType<U> = null): Promise<U> {
         let value = TransformUtil.toJSON(await this.getStateRaw(key));
         if (_.isNil(type) || _.isNil(value)) {
             return value;
         }
-        let item: U = TransformUtil.toClass<U>(type, value);
-        if (isNeedValidate) {
-            ValidateUtil.validate(item);
-        }
-        return item;
+        return TransformUtil.toClass<U>(type, value);;
     }
 
     public async getStateRaw(key: string): Promise<string> {
@@ -126,21 +122,18 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
         return !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
     }
 
-    public async putState<U>(
-        key: string,
-        value: U,
-        isNeedValidate: boolean = true,
-        isNeedTransform: boolean = true,
-        isNeedSortKeys: boolean = true
-    ): Promise<U> {
-        if (isNeedValidate) {
+    public async putState<U>(key: string, value: U, options: IPutStateOptions): Promise<U> {
+        if (_.isNil(options)) {
+            options = { isValidate: true, isTransform: true, isSortKeys: true };
+        }
+        if (options.isValidate) {
             ValidateUtil.validate(value);
         }
         let item = value;
-        if (isNeedTransform) {
+        if (options.isTransform) {
             item = TransformUtil.fromClass(value);
         }
-        if (isNeedSortKeys) {
+        if (options.isSortKeys) {
             item = ObjectUtil.sortKeys(item, true);
         }
         await this.putStateRaw(key, TransformUtil.fromJSON(item));

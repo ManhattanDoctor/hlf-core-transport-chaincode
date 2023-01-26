@@ -30,7 +30,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         super(logger, null, payload.id, payload.options, null);
         this.wrapper = wrapper;
 
-        this.state = new StateProxy(this.getStateRawProxy);
+        this.state = new StateProxy(logger, this.getStateRawProxy);
 
         this._transactionHash = transactionHash;
         this._transactionDate = transactionDate;
@@ -107,12 +107,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         return this.wrapper.getStateByRange(startKey, endKey);
     }
 
-    public async getStateByRangeWithPagination(
-        startKey: string,
-        endKey: string,
-        pageSize: number,
-        bookmark?: string
-    ): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
+    public async getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
         return this.wrapper.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
     }
 

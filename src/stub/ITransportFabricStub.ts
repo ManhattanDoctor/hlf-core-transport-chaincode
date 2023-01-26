@@ -14,7 +14,7 @@ export interface ITransportFabricStub {
     loadKV(iterator: Iterators.StateQueryIterator): Promise<Array<IKeyValue>>;
     getPaginatedKV(request: IPageBookmark, start: string, finish: string): Promise<IPaginationBookmark<IKeyValue>>;
 
-    getState<U>(key: string, type?: ClassType<U>, isNeedValidate?: boolean): Promise<U>;
+    getState<U>(key: string, type?: ClassType<U>): Promise<U>;
     getStateRaw(key: string): Promise<string>;
 
     getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
@@ -25,7 +25,7 @@ export interface ITransportFabricStub {
         bookmark?: string
     ): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
 
-    putState<U>(key: string, value: U, isNeedValidate?: boolean, isNeedTransform?: boolean): Promise<U>;
+    putState<U>(key: string, value: U, options: IPutStateOptions): Promise<U>;
     putStateRaw(key: string, value: string): Promise<void>;
 
     hasState(key: string): Promise<boolean>;
@@ -33,6 +33,12 @@ export interface ITransportFabricStub {
 
     dispatch<T>(event: ITransportEvent<T>): Promise<void>;
     destroyAsync(): Promise<void>;
+}
+
+export interface IPutStateOptions {
+    isValidate?: boolean;
+    isSortKeys?: boolean;
+    isTransform?: boolean;
 }
 
 export interface IKeyValue {

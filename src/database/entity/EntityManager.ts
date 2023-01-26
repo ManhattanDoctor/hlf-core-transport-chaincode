@@ -39,7 +39,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
         return _.isNil(options.transform) ? items : await Promise.all(items.map(item => options.transform(item)));
     }
 
-    protected abstract serialize(item: U): Promise<any>;
+    protected abstract serialize<V = any>(item: U): Promise<V>;
 
     protected abstract deserialize(item: any, details?: Array<keyof U>): Promise<U>;
 
@@ -60,8 +60,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
     }
 
     public async save(item: U): Promise<U> {
-        await this.stub.putState(getUid(item), await this.serialize(item), false, false);
-        this.debug(`"${item.uid}" saved`);
+        await this.stub.putState(getUid(item), await this.serialize(item), { isSortKeys: true });
         return item;
     }
 

@@ -24,7 +24,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
 
     constructor(logger: ILogger, stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
         super(logger, stub, requestId, options, transport);
-        this.state = new StateProxy(this.getStateRawProxy);
+        this.state = new StateProxy(logger, this.getStateRawProxy);
         this.events = new Map();
     }
 

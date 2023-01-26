@@ -8,6 +8,7 @@ import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
 import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
 import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
+import { NoCommandsToBatchError } from './NoCommandsToBatchError';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
     // --------------------------------------------------------------------------
@@ -55,13 +56,14 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let database = new DatabaseManager(this.logger, stub);
         let items = await database.getKV(TransportFabricChaincodeReceiverBatch.PREFIX);
         if (_.isEmpty(items)) {
-            throw new ExtendedError(`No commands to batch`);
+            throw new NoCommandsToBatchError();
         }
 
         let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
         for (let item of items) {
             let result = {} as any;
+            this.debug(`Batching "${item.key}"...`)
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
             } catch (error) {
@@ -82,7 +84,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     protected async batchAdd<U>(payload: TransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
         TransportFabricRequestPayload.clearDefaultOptions(payload.options);
         delete payload.isNeedReply;
-        await stub.putState(this.toBatchKey(stub, command), payload);
+        await stub.putState(this.toBatchKey(stub, command), payload, {});
     }
 
     protected async batchCommand<U>(item: IKeyValue, stubOriginal: ChaincodeStub, wrapper: TransportFabricStubWrapper): Promise<TransportFabricResponsePayload<U>> {

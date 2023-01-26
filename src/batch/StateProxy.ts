@@ -1,8 +1,8 @@
-import { Destroyable, ArrayUtil } from '@ts-core/common';
+import { LoggerWrapper, ILogger, ArrayUtil } from '@ts-core/common';
 import * as _ from 'lodash';
 import { IKeyValue } from '../stub';
 
-export class StateProxy extends Destroyable {
+export class StateProxy extends LoggerWrapper {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -21,8 +21,8 @@ export class StateProxy extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-    constructor(getStateRaw: GetStateRaw) {
-        super();
+    constructor(logger: ILogger, getStateRaw: GetStateRaw) {
+        super(logger);
 
         this.state = new Map();
         this.getStateRaw = getStateRaw;
@@ -67,6 +67,8 @@ export class StateProxy extends Destroyable {
         }
         let item = await this.getStateRaw(key);
         this.state.set(key, item);
+        this.debug(`Get state: "${key}"`);
+        this.verbose(`Get value: ${item}`);
         return item;
     }
 
@@ -76,6 +78,8 @@ export class StateProxy extends Destroyable {
         }
         this.state.set(key, item);
         this.toPut.set(key, item);
+        this.debug(`Put state: "${key}"`);
+        this.verbose(`Put value: ${item}`);
     }
 
     public removeState(key: string): void {
@@ -84,6 +88,7 @@ export class StateProxy extends Destroyable {
         }
         this.state.delete(key);
         this.toPut.delete(key);
+        this.debug(`Remove state: "${key}"`);
     }
 
     public destroy(): void {
@@ -112,7 +117,7 @@ export class StateProxy extends Destroyable {
     public get toPut(): Map<string, string> {
         return this._toPut;
     }
-    
+
     public get toRemove(): Array<string> {
         return this._toRemove;
     }
