@@ -63,7 +63,9 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let response = {} as ITransportFabricBatchDto;
         for (let item of items) {
             let result = {} as any;
-            this.debug(`Batching "${item.key}"...`)
+            this.debug(`Batching "${item.key}"...`);
+            this.debug(`Do noting!`);
+            /*
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
             } catch (error) {
@@ -73,6 +75,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             } finally {
                 response[this.batchKeyToHash(item.key)] = result;
             }
+            */
         }
         await wrapper.destroyAsync();
         for (let item of items) {

@@ -105,10 +105,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     //
     // --------------------------------------------------------------------------
 
-    public async hasState(key: string): Promise<boolean> {
-        return !_.isNil(await this.getStateRaw(key));
-    }
-
     public async getState<U>(key: string, type: ClassType<U> = null): Promise<U> {
         let value = TransformUtil.toJSON(await this.getStateRaw(key));
         if (_.isNil(type) || _.isNil(value)) {
@@ -118,8 +114,25 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async getStateRaw(key: string): Promise<string> {
+        this.debug(`GET STATE: ${key}`);
         let item = await this.stub.getState(key);
-        return !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
+        let value = !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
+        this.debug(`GET STATE VALUE: ${value}`);
+        this.debug(`============`);
+        return value;
+    }
+
+    public async getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
+        return this.stub.getStateByRange(startKey, endKey);
+    }
+
+    public async getStateByRangeWithPagination(
+        startKey: string,
+        endKey: string,
+        pageSize: number,
+        bookmark?: string
+    ): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
+        return this.stub.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
     }
 
     public async putState<U>(key: string, value: U, options: IPutStateOptions): Promise<U> {
@@ -140,24 +153,19 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
         return item;
     }
 
-    public async getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
-        return this.stub.getStateByRange(startKey, endKey);
-    }
-
-    public async getStateByRangeWithPagination(
-        startKey: string,
-        endKey: string,
-        pageSize: number,
-        bookmark?: string
-    ): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
-        return this.stub.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
-    }
-
     public async putStateRaw(key: string, item: string): Promise<void> {
+        this.debug(`PUT STATE: ${key}`);
+        this.debug(`PUT STATE VALUE: ${item}`);
+        this.debug(`============`);
         return this.stub.putState(key, Buffer.from(item, TransformUtil.ENCODING));
     }
 
+    public async hasState(key: string): Promise<boolean> {
+        return !_.isNil(await this.getStateRaw(key));
+    }
+
     public async removeState(key: string): Promise<void> {
+        this.debug(`REMOVE STATE: ${key}`);
         return this.stub.deleteState(key);
     }
 

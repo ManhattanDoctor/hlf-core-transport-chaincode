@@ -67,8 +67,6 @@ export class StateProxy extends LoggerWrapper {
         }
         let item = await this.getStateRaw(key);
         this.state.set(key, item);
-        this.debug(`Get state: "${key}"`);
-        this.verbose(`Get value: ${item}`);
         return item;
     }
 
@@ -78,8 +76,6 @@ export class StateProxy extends LoggerWrapper {
         }
         this.state.set(key, item);
         this.toPut.set(key, item);
-        this.debug(`Put state: "${key}"`);
-        this.verbose(`Put value: ${item}`);
     }
 
     public removeState(key: string): void {
