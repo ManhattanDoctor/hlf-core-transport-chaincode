@@ -63,7 +63,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let response = {} as ITransportFabricBatchDto;
         for (let item of items) {
             let result = {} as any;
-            this.debug(`Batching "${item.key}"...`);
             try {
                 result = await this.batchCommand(item, stubOriginal, wrapper);
             } catch (error) {

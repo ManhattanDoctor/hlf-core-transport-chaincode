@@ -1,9 +1,9 @@
-import { ITransportEvent, ITransportReceiver, TransformUtil, Destroyable, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
+import { ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
-import * as _ from 'lodash';
 import { IKeyValue, IPutStateOptions, ITransportFabricStub } from './ITransportFabricStub';
 import { LoggerWrapper, ILogger, ExtendedError, TweetNaCl } from '@ts-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
+import * as _ from 'lodash';
 
 export class TransportFabricStub extends LoggerWrapper implements ITransportFabricStub {
     // --------------------------------------------------------------------------
@@ -99,7 +99,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
 
     protected setEvent(item: ITransportFabricEvents): void {
         item = ObjectUtil.sortKeys(item, true);
-        this.debug(`Setting events: "${JSON.stringify(item)}"`);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 
@@ -131,12 +130,8 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async getStateRaw(key: string): Promise<string> {
-        this.debug(`GET STATE: ${key}`);
         let item = await this.stub.getState(key);
-        let value = !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
-        this.debug(`GET STATE VALUE: ${value}`);
-        this.debug(`============`);
-        return value;
+        return !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
     }
 
     public async getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
@@ -166,9 +161,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async putStateRaw(key: string, item: string): Promise<void> {
-        this.debug(`PUT STATE: ${key}`);
-        this.debug(`PUT STATE VALUE: ${item}`);
-        this.debug(`============`);
         return this.stub.putState(key, Buffer.from(item, TransformUtil.ENCODING));
     }
 
@@ -177,7 +169,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async removeState(key: string): Promise<void> {
-        this.debug(`REMOVE STATE: ${key}`);
         return this.stub.deleteState(key);
     }
 
@@ -219,10 +210,8 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     //
     // --------------------------------------------------------------------------
 
-    public async dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): Promise<void> {
-        if (isNeedValidate) {
-            ValidateUtil.validate(value);
-        }
+    public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
+        ValidateUtil.validate(value);
         this.transport.dispatch(value);
         this.eventsToDispatch.push(value);
     }
@@ -267,6 +256,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
 }
 
 export interface ITransportFabricEvents {
-    [key: string]: Array<ITransportEvent<any>>;
+    [transactionHash: string]: Array<ITransportEvent<any>>;
 }
 

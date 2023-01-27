@@ -101,7 +101,7 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         this.events.set(transactionHash, items);
     }
 
-    public async dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): Promise<void> {
+    public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
         throw new ExtendedError(`Can't dispatch event directly, use TransportFabricStubBatch`);
     }
 
