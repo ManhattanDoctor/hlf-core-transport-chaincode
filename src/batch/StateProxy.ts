@@ -84,7 +84,6 @@ export class StateProxy extends LoggerWrapper {
         }
         this.state.delete(key);
         this.toPut.delete(key);
-        this.debug(`Remove state: "${key}"`);
     }
 
     public destroy(): void {

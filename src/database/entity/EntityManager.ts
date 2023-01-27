@@ -85,7 +85,6 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
 
     public async remove(item: UID): Promise<void> {
         await this.stub.removeState(getUid(item));
-        this.debug(`"${getUid(item)}" removed`);
     }
 
     public async removeMany(items: Array<UID>): Promise<void> {
