@@ -2,10 +2,29 @@ import { ITransportEvent, ITransportReceiver, TransformUtil, Destroyable, IPageB
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
 import * as _ from 'lodash';
 import { IKeyValue, IPutStateOptions, ITransportFabricStub } from './ITransportFabricStub';
-import { LoggerWrapper, ILogger, ExtendedError } from '@ts-core/common';
+import { LoggerWrapper, ILogger, ExtendedError, TweetNaCl } from '@ts-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
 
 export class TransportFabricStub extends LoggerWrapper implements ITransportFabricStub {
+    // --------------------------------------------------------------------------
+    //
+    //  Static Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public static fillEvents(item: ITransportFabricEvents, transactionHash: string, events: Array<ITransportEvent<any>>): ITransportFabricEvents {
+        if (_.isNil(transactionHash) || _.isEmpty(events)) {
+            return item;
+        }
+        let items = item[transactionHash] = new Array();
+        for (let i = 0; i < events.length; i++) {
+            let event = TransformUtil.fromClass(events[i]);
+            event.uid = TweetNaCl.hash(`${transactionHash}_${i}`);
+            items.push(event);
+        }
+        return item;
+    }
+
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -73,18 +92,13 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     protected dispatchEvents(): void {
-        if (_.isEmpty(this.eventsToDispatch)) {
-            return;
+        if (!_.isEmpty(this.eventsToDispatch)) {
+            this.setEvent(TransportFabricStub.fillEvents({}, this.transactionHash, this.eventsToDispatch));
         }
-
-        let item = {};
-        TransformUtil.fromClassMany(this.eventsToDispatch).forEach(event => item[event.uid] = event);
-        this.setEvent(item);
     }
 
-    protected setEvent(item: any): void {
+    protected setEvent(item: ITransportFabricEvents): void {
         item = ObjectUtil.sortKeys(item, true);
-        
         this.debug(`Setting events: "${JSON.stringify(item)}"`);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
@@ -129,12 +143,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
         return this.stub.getStateByRange(startKey, endKey);
     }
 
-    public async getStateByRangeWithPagination(
-        startKey: string,
-        endKey: string,
-        pageSize: number,
-        bookmark?: string
-    ): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
+    public async getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
         return this.stub.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
     }
 
@@ -255,5 +264,9 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     public get transactionDate(): Date {
         return this._transactionDate;
     }
+}
+
+export interface ITransportFabricEvents {
+    [key: string]: Array<ITransportEvent<any>>;
 }
 

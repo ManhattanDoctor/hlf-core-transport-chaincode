@@ -2,7 +2,7 @@ import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { ITransportEvent, ExtendedError, ILogger, TransformUtil, ObjectUtil, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub, Iterators } from 'fabric-shim';
 import * as _ from 'lodash';
-import { TransportFabricStub } from '../stub/TransportFabricStub';
+import { ITransportFabricEvents, TransportFabricStub } from '../stub/TransportFabricStub';
 import { IKeyValue } from '../stub/ITransportFabricStub';
 import { GetStateRaw, StateProxy } from './StateProxy';
 
@@ -38,8 +38,9 @@ export class TransportFabricStubWrapper extends TransportFabricStub {
         if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
-        let item = {};
-        this.events.forEach((events, transactionHash) => item[transactionHash] = TransformUtil.fromClassMany(events));
+
+        let item: ITransportFabricEvents = {};
+        this.events.forEach((events, transactionHash) => TransportFabricStub.fillEvents(item, transactionHash, events));
         this.setEvent(item);
     }
 
