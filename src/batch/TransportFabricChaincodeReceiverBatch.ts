@@ -25,7 +25,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     //
     // --------------------------------------------------------------------------
 
-    protected batchLastTime: number;
+    // protected batchLastTime: number;
 
     // --------------------------------------------------------------------------
     //
@@ -108,11 +108,13 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         if (!_.isNumber(this.settings.batch.timeout)) {
             return;
         }
+        /*
         let time = stub.transactionDate.getTime();
         if (_.isNumber(this.batchLastTime) && time - this.batchLastTime < this.settings.batch.timeout) {
             throw new ExtendedError(`Batch command timeout is not exceeded`);
         }
         this.batchLastTime = time;
+        */
     }
 
     protected isCommandBatch<U>(item: ITransportCommand<U> | TransportFabricRequestPayload<U>): boolean {

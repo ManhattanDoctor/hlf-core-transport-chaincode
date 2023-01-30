@@ -12,7 +12,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     //
     // --------------------------------------------------------------------------
 
-    public static fillEvents(item: ITransportFabricEvents, transactionHash: string, events: Array<ITransportEvent<any>>): ITransportFabricEvents {
+    public static setEvents(item: ITransportFabricEvents, transactionHash: string, events: Array<ITransportEvent<any>>): ITransportFabricEvents {
         if (_.isNil(transactionHash) || _.isEmpty(events)) {
             return item;
         }
@@ -93,7 +93,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
 
     protected dispatchEvents(): void {
         if (!_.isEmpty(this.eventsToDispatch)) {
-            this.setEvent(TransportFabricStub.fillEvents({}, this.transactionHash, this.eventsToDispatch));
+            this.setEvent(TransportFabricStub.setEvents({}, this.transactionHash, this.eventsToDispatch));
         }
     }
 
