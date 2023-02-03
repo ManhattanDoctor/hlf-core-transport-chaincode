@@ -99,6 +99,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
 
     protected setEvent(item: ITransportFabricEvents): void {
         item = ObjectUtil.sortKeys(item, true);
+        this.debug(`Set event`, JSON.stringify(item));
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 
@@ -161,6 +162,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async putStateRaw(key: string, item: string): Promise<void> {
+        this.debug(`Put state`, item);
         return this.stub.putState(key, Buffer.from(item, TransformUtil.ENCODING));
     }
 

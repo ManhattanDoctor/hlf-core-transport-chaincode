@@ -105,10 +105,10 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         if (payload.options.signature.publicKey !== this.settings.batch.publicKey) {
             throw new ExtendedError(`Batch command has invalid publicKey`);
         }
+        /*
         if (!_.isNumber(this.settings.batch.timeout)) {
             return;
         }
-        /*
         let time = stub.transactionDate.getTime();
         if (_.isNumber(this.batchLastTime) && time - this.batchLastTime < this.settings.batch.timeout) {
             throw new ExtendedError(`Batch command timeout is not exceeded`);
