@@ -1,6 +1,6 @@
-import { ILogger, AbstractTransportCommandHandler, ITransportCommand, ITransport } from '@ts-core/common';
+import { ILogger, TransportCommandHandlerAbstract, ITransportCommand, ITransport } from '@ts-core/common';
 
-export abstract class TransportCommandFabricHandler<U, T extends ITransportCommand<U>> extends AbstractTransportCommandHandler<U, T> {
+export abstract class TransportCommandFabricHandler<U, T extends ITransportCommand<U>> extends TransportCommandHandlerAbstract<U, T> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
