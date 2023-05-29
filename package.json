@@ -16,7 +16,7 @@
     },
     "license": "ISC",
     "dependencies": {
-        "@hlf-core/transport-common": "~3.0.10",
+        "@hlf-core/transport-common": "~3.0.11",
         "fabric-shim": "2.5.1",
         "reflect-metadata": "~0.1.13"
     },

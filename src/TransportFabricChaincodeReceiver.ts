@@ -1,11 +1,10 @@
-import { ExtendedError } from '@ts-core/common';
-import { ILogger } from '@ts-core/common';
-import { PromiseHandler } from '@ts-core/common';
-import { Observable } from 'rxjs';
 import {
+    ILogger,
+    ExtendedError,
+    PromiseHandler,
     ITransportCommand,
     ITransportEvent,
-    ITransportRequestStorage,
+    ITransportCommandRequest,
     Transport,
     ISignature,
     TransportLogType,
@@ -16,15 +15,18 @@ import {
     TransportCommandAsync,
     ITransportReceiver,
     TransportWaitExceedError,
-    DateUtil, ObjectUtil
+    DateUtil,
+    ObjectUtil,
+    TransportCryptoManager
 } from '@ts-core/common';
+import { Observable } from 'rxjs';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
 import { ITransportFabricStub, TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 
-export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends Transport<T> {
+export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends Transport<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -32,6 +34,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     // --------------------------------------------------------------------------
 
     protected defaultCreateStubFactory = <U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => new TransportFabricStub(logger, stub, payload.id, payload.options, transport);
+
     protected defaultCreateCommandFactory = <U>(item: ITransportFabricRequestPayload<U>) => new TransportCommandAsync(item.name, item.request, item.id);
 
     // --------------------------------------------------------------------------
@@ -72,7 +75,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         this.logCommand(command, TransportLogType.REQUEST_RECEIVED);
 
         let request = this.checkRequestStorage(payload, stub, command);
-        if (this.isRequestExpired(request)) {
+        if (this.isCommandRequestExpired(request)) {
             this.logCommand(command, TransportLogType.REQUEST_EXPIRED);
             this.warn(`Received "${command.name}" command with already expired timeout: ignore`);
             this.requests.delete(command.id);
@@ -87,7 +90,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new ExtendedError('Command must be instance of "TransportFabricChaincodeCommandWrapper"');
         }
 
-        let request = this.requests.get(command.id) as ITransportFabricRequestStorage;
+        let request = this.requests.get(command.id);
         this.requests.delete(command.id);
 
         if (_.isNil(request)) {
@@ -96,7 +99,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         }
 
         let handler = request.handler;
-        if (this.isRequestExpired(request)) {
+        if (this.isCommandRequestExpired(request)) {
             this.logCommand(command, TransportLogType.RESPONSE_EXPIRED);
             let error = new ExtendedError(`Unable to completed "${command.name}" command: timeout is expired`);
             this.warn(error.message);
@@ -112,12 +115,12 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     }
 
     public wait<U>(command: ITransportCommand<U>): void {
-        let request = this.requests.get(command.id) as ITransportFabricRequestStorage;
+        let request = this.requests.get(command.id);
         if (_.isNil(request)) {
             throw new ExtendedError(`Unable to wait "${command.name}" command: can't find request details`);
         }
 
-        if (this.isRequestWaitExpired(request)) {
+        if (this.isCommandRequestWaitExpired(request)) {
             this.complete(command, new TransportWaitExceedError(command));
             return;
         }
@@ -147,7 +150,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         }
         super.destroy();
 
-        this.requests.forEach((item: ITransportFabricRequestStorage) => item.handler.reject(new ExtendedError(`Chaincode destroyed`)));
+        this.requests.forEach(item => item.handler.reject(new ExtendedError(`Chaincode destroyed`)));
         this.requests.clear();
         this.requests = null;
     }
@@ -176,21 +179,18 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         payload: ITransportFabricRequestPayload<U>,
         stub: ITransportFabricStub,
         command: ITransportCommand<U>
-    ): ITransportFabricRequestStorage<U> {
-        let item = this.requests.get(command.id) as ITransportFabricRequestStorage;
+    ): ITransportFabricCommandRequest {
+        let item = this.requests.get(command.id);
         if (!_.isNil(item)) {
-            item.waitCount++;
-        } else {
-            item = {
-                waitCount: 0,
-                isNeedReply: payload.isNeedReply,
-                expiredDate: payload.isNeedReply ? DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, payload.options)) : null,
-                handler: PromiseHandler.create<TransportFabricResponsePayload<U>, ExtendedError>(),
-                payload
-            };
-            item = ObjectUtil.copyProperties(payload.options, item);
-            this.requests.set(command.id, item);
+            item.waited++;
+            return item;
         }
+
+        item = ObjectUtil.copyProperties(payload.options, { waited: 0, isNeedReply: payload.isNeedReply, handler: PromiseHandler.create(), payload });
+        if (payload.isNeedReply) {
+            item.expired = DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, payload.options));
+        }
+        this.requests.set(command.id, item);
         return item;
     }
 
@@ -217,7 +217,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new ExtendedError(`Command "${command.name}" signature algorithm (${signature.algorithm}) doesn't support`);
         }
 
-        let isVerified = await manager.verify(command, signature);
+        let isVerified = await TransportCryptoManager.verify(command, manager, signature);
         if (!isVerified) {
             throw new ExtendedError(`Command "${command.name}" has invalid signature`);
         }
@@ -254,7 +254,7 @@ export interface ITransportFabricChaincodeSettings extends ITransportSettings {
     commandFactory?: <U>(payload: ITransportFabricRequestPayload<U>) => ITransportCommand<U>;
 }
 
-interface ITransportFabricRequestStorage<U = any, V = any> extends ITransportRequestStorage {
+interface ITransportFabricCommandRequest<U = any, V = any> extends ITransportCommandRequest {
     payload: ITransportFabricRequestPayload<U>;
     handler: PromiseHandler<ITransportFabricResponsePayload<V>, ExtendedError>;
 }
