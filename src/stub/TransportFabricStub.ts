@@ -161,7 +161,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
     }
 
     public async putStateRaw(key: string, item: string): Promise<void> {
-        this.debug(`STATE "${key}": ${JSON.stringify(item)}`);
         return this.stub.putState(key, Buffer.from(item, TransformUtil.ENCODING));
     }
 
