@@ -55,7 +55,6 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             }
         } catch (error) {
             error = ExtendedError.create(error);
-            this.warn(error.message);
             return Promise.resolve(TransportFabricResponsePayload.fromError(!_.isNil(payload) ? payload.id : null, error));
         }
 
@@ -113,9 +112,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         throw new ExtendedError(`Method doesn't implemented`);
     }
 
-    protected async eventRequestExecute<U>(event: ITransportEvent<U>, options?: void): Promise<void> {
-        console.log('called eventRequestExecute', event);
-    }
+    protected async eventRequestExecute<U>(event: ITransportEvent<U>, options?: void): Promise<void> { }
 
     protected isNonSignedCommand<U>(command: ITransportCommand<U>): boolean {
         let items = this.getSettingsValue('nonSignedCommands');
@@ -148,7 +145,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     }
 
     protected async executeCommand<U>(chaincodeStub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
-        return this.commandResponseDispatch(command, payload.options, payload.isNeedReply);
+        await this.commandResponseRequestDispatch(command, payload.options, payload.isNeedReply);
     }
 
     protected createCommand<U>(payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub): ITransportCommand<U> {
