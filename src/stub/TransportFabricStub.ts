@@ -99,7 +99,6 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
 
     protected setEvent(item: ITransportFabricEvents): void {
         item = ObjectUtil.sortKeys(item, true);
-        this.debug(`EVENT: ${JSON.stringify(item)}`);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 

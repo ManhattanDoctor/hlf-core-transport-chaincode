@@ -25,7 +25,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     //
     // --------------------------------------------------------------------------
 
-    // protected batchLastTime: number;
+    protected batchLastTime: number;
 
     // --------------------------------------------------------------------------
     //
@@ -38,18 +38,18 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             return super.executeCommand(stubOriginal, payload, stub, command);
         }
 
-        let result = null;
+        let response = null;
         try {
             if (this.isCommandBatch(payload)) {
                 await this.batchValidate(payload, stub);
-                result = await this.batch(stubOriginal, stub, payload);
+                response = await this.batch(stubOriginal, stub, payload);
             } else {
-                result = await this.batchAdd(payload, stub, command);
+                response = await this.batchAdd(payload, stub, command);
             }
         } catch (error) {
-            result = ExtendedError.create(error);
+            response = ExtendedError.create(error);
         }
-        this.complete(command, result);
+        this.complete(command, response);
     }
 
     protected async batch<U>(stubOriginal: ChaincodeStub, stub: ITransportFabricStub, payload: TransportFabricRequestPayload<U>): Promise<ITransportFabricBatchDto> {
@@ -62,15 +62,15 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
         for (let item of items) {
-            let result = {} as any;
+            let response = {} as any;
             try {
-                result = await this.batchCommand(item, stubOriginal, wrapper);
+                response = await this.batchCommand(item, stubOriginal, wrapper);
             } catch (error) {
                 error = ExtendedError.create(error);
                 this.error(`Unable to execute batched command: ${error.message}`);
-                result = TransformUtil.fromClass(error);
+                response = TransformUtil.fromClass(error);
             } finally {
-                response[this.batchKeyToHash(item.key)] = result;
+                response[this.batchKeyToHash(item.key)] = response;
             }
         }
         await wrapper.destroyAsync();
@@ -105,7 +105,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         if (payload.options.signature.publicKey !== this.settings.batch.publicKey) {
             throw new ExtendedError(`Batch command has invalid publicKey`);
         }
-        /*
+
         if (!_.isNumber(this.settings.batch.timeout)) {
             return;
         }
@@ -114,7 +114,6 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             throw new ExtendedError(`Batch command timeout is not exceeded`);
         }
         this.batchLastTime = time;
-        */
     }
 
     protected isCommandBatch<U>(item: ITransportCommand<U> | TransportFabricRequestPayload<U>): boolean {
@@ -133,6 +132,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 case TransportLogType.RESPONSE_SENDED:
                 case TransportLogType.RESPONSE_RECEIVED:
                 case TransportLogType.RESPONSE_NO_REPLY:
+                case TransportLogType.RESPONSE_NO_REPLY_ERROR:
                     return;
             }
         }

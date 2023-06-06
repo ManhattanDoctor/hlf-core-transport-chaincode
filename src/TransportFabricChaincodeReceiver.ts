@@ -5,28 +5,25 @@ import {
     ITransportCommand,
     ITransportEvent,
     ITransportCommandRequest,
-    Transport,
     ISignature,
     TransportLogType,
     ITransportCryptoManager,
     ITransportSettings,
     ITransportCommandOptions,
-    ITransportCommandAsync,
     TransportCommandAsync,
     ITransportReceiver,
-    TransportWaitExceedError,
+    TransportImpl,
     DateUtil,
     ObjectUtil,
     TransportCryptoManager
 } from '@ts-core/common';
-import { Observable } from 'rxjs';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
 import { ITransportFabricStub, TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 
-export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends Transport<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
+export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends TransportImpl<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -39,23 +36,13 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
 
     // --------------------------------------------------------------------------
     //
-    //  Constructor
-    //
-    // --------------------------------------------------------------------------
-
-    constructor(logger: ILogger, settings?: T) {
-        super(logger, settings);
-    }
-
-    // --------------------------------------------------------------------------
-    //
     //  Public Methods
     //
     // --------------------------------------------------------------------------
 
     public async invoke<U = any, V = any>(chaincode: ChaincodeStub): Promise<ITransportFabricResponsePayload<V>> {
-        let payload: ITransportFabricRequestPayload<U> = null;
         let stub: ITransportFabricStub = null;
+        let payload: ITransportFabricRequestPayload<U> = null;
         let command: ITransportCommand<U> = null;
 
         try {
@@ -75,98 +62,24 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         this.logCommand(command, TransportLogType.REQUEST_RECEIVED);
 
         let request = this.checkRequestStorage(payload, stub, command);
-        if (this.isCommandRequestExpired(request)) {
-            this.logCommand(command, TransportLogType.REQUEST_EXPIRED);
-            this.warn(`Received "${command.name}" command with already expired timeout: ignore`);
-            this.requests.delete(command.id);
-            return;
-        }
         this.executeCommand(chaincode, payload, stub, command);
         return request.handler.promise;
     }
 
-    public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
+    public complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void {
         if (!(command instanceof TransportFabricChaincodeCommandWrapper<U, V>)) {
             throw new ExtendedError('Command must be instance of "TransportFabricChaincodeCommandWrapper"');
         }
 
         let request = this.requests.get(command.id);
+        if (_.isNil(request)) {
+            return;
+        }
+
         this.requests.delete(command.id);
 
-        if (_.isNil(request)) {
-            this.warn(`Unable to complete command "${command.name}", probably command was already completed`);
-            return;
-        }
-
-        let handler = request.handler;
-        if (this.isCommandRequestExpired(request)) {
-            this.logCommand(command, TransportLogType.RESPONSE_EXPIRED);
-            let error = new ExtendedError(`Unable to completed "${command.name}" command: timeout is expired`);
-            this.warn(error.message);
-            handler.resolve(TransportFabricResponsePayload.fromError(command.id, error));
-            return;
-        }
-
-        command.response(result);
-        this.logCommand(command, request.isNeedReply ? TransportLogType.RESPONSE_SENDED : TransportLogType.RESPONSE_NO_REPLY);
-
-        let payload = this.createResponsePayload(command);
-        command.destroyAsync().then(() => handler.resolve(payload));
-    }
-
-    public wait<U>(command: ITransportCommand<U>): void {
-        let request = this.requests.get(command.id);
-        if (_.isNil(request)) {
-            throw new ExtendedError(`Unable to wait "${command.name}" command: can't find request details`);
-        }
-
-        if (this.isCommandRequestWaitExpired(request)) {
-            this.complete(command, new TransportWaitExceedError(command));
-            return;
-        }
-
-        this.waitSend(command);
-    }
-
-    public dispatch<T>(event: ITransportEvent<T>): void {
-        this.eventSend(event);
-    }
-
-    public getDispatcher<T>(name: string): Observable<T> {
-        throw new ExtendedError(`Method is not supported, use TransportFabricSender instead`);
-    }
-
-    public send<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): void {
-        throw new ExtendedError(`Method is not supported, use TransportFabricSender instead`);
-    }
-
-    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions): Promise<V> {
-        throw new ExtendedError(`Method is not supported, use TransportFabricSender instead`);
-    }
-
-    public destroy(): void {
-        if (this.isDestroyed) {
-            return;
-        }
-        super.destroy();
-
-        this.requests.forEach(item => item.handler.reject(new ExtendedError(`Chaincode destroyed`)));
-        this.requests.clear();
-        this.requests = null;
-    }
-
-    // --------------------------------------------------------------------------
-    //
-    //  Send Methods
-    //
-    // --------------------------------------------------------------------------
-
-    protected async eventSend<U>(event: ITransportEvent<U>): Promise<void> {
-        this.logEvent(event, TransportLogType.EVENT_SENDED);
-    }
-
-    protected async waitSend<U>(command: ITransportCommand<U>): Promise<void> {
-        this.logCommand(command, TransportLogType.RESPONSE_WAIT);
+        command.response(response);
+        this.commandResponse(command, request);
     }
 
     // --------------------------------------------------------------------------
@@ -175,11 +88,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     //
     // --------------------------------------------------------------------------
 
-    protected checkRequestStorage<U>(
-        payload: ITransportFabricRequestPayload<U>,
-        stub: ITransportFabricStub,
-        command: ITransportCommand<U>
-    ): ITransportFabricCommandRequest {
+    protected checkRequestStorage<U>(payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): ITransportFabricCommandRequest {
         let item = this.requests.get(command.id);
         if (!_.isNil(item)) {
             item.waited++;
@@ -194,8 +103,23 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         return item;
     }
 
+    protected async commandResponseExecute<U, V>(command: TransportFabricChaincodeCommandWrapper<U, V>, request: ITransportFabricCommandRequest): Promise<void> {
+        let payload = this.createResponsePayload(command);
+        await command.destroyAsync();
+        request.handler.resolve(payload);
+    }
+
+    protected commandRequestExecute<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): Promise<void> {
+        throw new ExtendedError(`Method doesn't implemented`);
+    }
+
+    protected eventRequestExecute<U>(event: ITransportEvent<U>, options?: void): Promise<void> {
+        throw new ExtendedError(`Method doesn't implemented`);
+    }
+
     protected isNonSignedCommand<U>(command: ITransportCommand<U>): boolean {
-        return !_.isEmpty(this.getSettingsValue('nonSignedCommands')) && this.getSettingsValue('nonSignedCommands').includes(command.name);
+        let items = this.getSettingsValue('nonSignedCommands');
+        return !_.isEmpty(items) && items.includes(command.name);
     }
 
     protected async validateSignature<U>(command: ITransportCommand<U>, signature: ISignature): Promise<void> {
@@ -212,7 +136,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new ExtendedError(`Command "${command.name}" signature has invalid publicKey`);
         }
 
-        let manager = _.find(this.getSettingsValue('cryptoManagers'), item => item.algorithm === signature.algorithm);
+        let manager = _.find(this.settings.cryptoManagers, { algorithm: signature.algorithm });
         if (_.isNil(manager)) {
             throw new ExtendedError(`Command "${command.name}" signature algorithm (${signature.algorithm}) doesn't support`);
         }
@@ -224,16 +148,12 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     }
 
     protected async executeCommand<U>(chaincodeStub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
-        let listener = this.listeners.get(command.name);
-        if (_.isNil(listener)) {
-            this.complete(command, new ExtendedError(`No listener for "${command.name}" command`));
-        } else {
-            listener.next(command);
-        }
+        return this.commandResponseDispatch(command, payload.options, payload.isNeedReply);
     }
 
     protected createCommand<U>(payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub): ITransportCommand<U> {
-        let command = this.getSettingsValue('commandFactory', this.defaultCreateCommandFactory)(payload);
+        let factory = this.getSettingsValue('commandFactory', this.defaultCreateCommandFactory);
+        let command = factory(payload);
         return new TransportFabricChaincodeCommandWrapper(payload, command, stub);
     }
 
