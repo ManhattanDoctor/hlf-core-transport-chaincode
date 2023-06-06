@@ -113,8 +113,8 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         throw new ExtendedError(`Method doesn't implemented`);
     }
 
-    protected eventRequestExecute<U>(event: ITransportEvent<U>, options?: void): Promise<void> {
-        throw new ExtendedError(`Method doesn't implemented`);
+    protected async eventRequestExecute<U>(event: ITransportEvent<U>, options?: void): Promise<void> {
+        console.log('called eventRequestExecute', event);
     }
 
     protected isNonSignedCommand<U>(command: ITransportCommand<U>): boolean {
