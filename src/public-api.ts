@@ -10,6 +10,8 @@ export * from './batch/TransportFabricStubBatch';
 export * from './batch/TransportFabricStubWrapper';
 //
 export * from './database/DatabaseManager';
+export * from './database/entity/EntityRelation';
+export * from './database/entity/EntityRelationChild';
 export * from './database/entity/EntityManager';
 export * from './database/entity/EntityManagerImpl';
 //

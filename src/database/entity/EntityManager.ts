@@ -20,7 +20,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
     //
     // --------------------------------------------------------------------------
 
-    protected getFindOptions(options?: IFindOptions): IFindOptions {
+    protected getFindOptions(options?: IEntityFindOptions): IEntityFindOptions {
         if (_.isNil(options)) {
             options = {};
         }
@@ -33,7 +33,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
         return options;
     }
 
-    protected async parseFindResult<T = any>(result: Array<IKeyValue>, options: IFindOptions<T>): Promise<Array<T | string>> {
+    protected async parseFindResult<T = any>(result: Array<IKeyValue>, options: IEntityFindOptions<T>): Promise<Array<T | string>> {
         let items = result.map(item => item.value);
         items = items.filter(item => !_.isNil(item));
         return _.isNil(options.transform) ? items : await Promise.all(items.map(item => options.transform(item)));
@@ -97,7 +97,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
     //
     // --------------------------------------------------------------------------
 
-    public async find(details?: Array<keyof U>, options?: IFindOptions): Promise<Array<U>> {
+    public async find(details?: Array<keyof U>, options?: IEntityFindOptions): Promise<Array<U>> {
         options = this.getFindOptions(options);
 
         let result = await this.getKV(options.prefix, this.getFinish(options.prefix));
@@ -105,7 +105,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
         return Promise.all(items.map(item => this.deserialize(item, details)));
     }
 
-    public async findPaginated(data: IPaginableBookmark<U>, options?: IFindOptions): Promise<IPaginationBookmark<U>> {
+    public async findPaginated(data: IPaginableBookmark<U>, options?: IEntityFindOptions): Promise<IPaginationBookmark<U>> {
         options = this.getFindOptions(options);
 
         let result = await this.getPaginatedKV(data, options.prefix, this.getFinish(options.prefix));
@@ -128,7 +128,7 @@ export abstract class EntityManager<U extends IUIDable> extends DatabaseManager 
     public abstract get prefix(): string;
 }
 
-export interface IFindOptions<T = any> {
+export interface IEntityFindOptions<T = any> {
     prefix?: string;
     transform?: (item: string) => T | Promise<T>;
 }
