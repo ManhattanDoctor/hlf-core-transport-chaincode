@@ -54,6 +54,7 @@ export abstract class EntityManagerImpl<U extends IUIDable> extends EntityManage
     //
     // --------------------------------------------------------------------------
 
+    
     public async loadDetails(item: U, details?: Array<keyof U>): Promise<void> { }
 
     public toEntity(item: any): U {
