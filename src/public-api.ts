@@ -11,6 +11,7 @@ export * from './batch/TransportFabricStubWrapper';
 //
 export * from './database/DatabaseManager';
 export * from './database/entity/EntityManager';
+export * from './database/entity/EntityManagerImpl';
 //
 export * from './stub/ITransportFabricStub';
 export * from './stub/ITransportFabricStubHolder';
