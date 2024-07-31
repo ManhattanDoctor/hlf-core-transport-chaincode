@@ -1,12 +1,7 @@
-import { ITransportFabricStub } from './ITransportFabricStub';
 import { ExtendedError } from '@ts-core/common';
+import { IStubHolder } from '@hlf-core/common';
 import * as _ from 'lodash';
 import 'reflect-metadata';
-
-export interface ITransportFabricStubHolder {
-    readonly stub: ITransportFabricStub;
-    destroyAsync(): Promise<void>;
-}
 
 // --------------------------------------------------------------------------
 //
@@ -24,7 +19,7 @@ export const StubHolder = (): any => {
     };
 };
 
-export function getStubHolder(target: any, args: Array<any>): ITransportFabricStubHolder {
+export function getStubHolder(target: any, args: Array<any>): IStubHolder {
     let index = Number(Reflect.getMetadata(STUB_HOLDER_INDEX, target));
     if (args.length === 0 || _.isNil(index) || _.isNaN(index) || index >= args.length) {
         throw new ExtendedError(`Unable to find stub holder, probably @StubHolder() decorator missed`, ExtendedError.HTTP_CODE_NOT_FOUND);

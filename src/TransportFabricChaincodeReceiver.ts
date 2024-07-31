@@ -18,10 +18,12 @@ import {
     TransportCryptoManager
 } from '@ts-core/common';
 import { ChaincodeStub } from 'fabric-shim';
-import * as _ from 'lodash';
-import { ITransportFabricStub, TransportFabricStub } from './stub';
+import { TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
+import { IStub } from '@hlf-core/common';
+import * as _ from 'lodash';
+import { SignatureInvalidError } from './ErrorCode';
 
 export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends TransportImpl<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
     // --------------------------------------------------------------------------
@@ -41,9 +43,9 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     // --------------------------------------------------------------------------
 
     public async invoke<U = any, V = any>(chaincode: ChaincodeStub): Promise<ITransportFabricResponsePayload<V>> {
-        let stub: ITransportFabricStub = null;
-        let payload: ITransportFabricRequestPayload<U> = null;
+        let stub: IStub = null;
         let command: ITransportCommand<U> = null;
+        let payload: ITransportFabricRequestPayload<U> = null;
 
         try {
             payload = TransportFabricRequestPayload.parse(chaincode.getFunctionAndParameters(), true);
@@ -66,7 +68,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     }
 
     public complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void {
-        if (!(command instanceof TransportFabricChaincodeCommandWrapper<U, V>)) {
+        if (!(command instanceof TransportFabricChaincodeCommandWrapper)) {
             throw new ExtendedError('Command must be instance of "TransportFabricChaincodeCommandWrapper"');
         }
 
@@ -87,7 +89,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     //
     // --------------------------------------------------------------------------
 
-    protected checkRequestStorage<U>(payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): ITransportFabricCommandRequest {
+    protected checkRequestStorage<U>(payload: ITransportFabricRequestPayload<U>, stub: IStub, command: ITransportCommand<U>): ITransportFabricCommandRequest {
         let item = this.requests.get(command.id);
         if (!_.isNil(item)) {
             item.waited++;
@@ -121,40 +123,40 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
 
     protected async validateSignature<U>(command: ITransportCommand<U>, signature: ISignature): Promise<void> {
         if (_.isNil(signature)) {
-            throw new ExtendedError(`Command "${command.name}" has nil signature`);
+            throw new SignatureInvalidError(`Command "${command.name}" has nil signature`);
         }
         if (_.isNil(signature.nonce)) {
-            throw new ExtendedError(`Command "${command.name}" signature has invalid nonce`);
+            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid nonce`);
         }
         if (_.isNil(signature.algorithm)) {
-            throw new ExtendedError(`Command "${command.name}" signature has invalid algorithm`);
+            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid algorithm`);
         }
         if (_.isNil(signature.publicKey)) {
-            throw new ExtendedError(`Command "${command.name}" signature has invalid publicKey`);
+            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid publicKey`);
         }
 
         let manager = _.find(this.settings.cryptoManagers, { algorithm: signature.algorithm });
         if (_.isNil(manager)) {
-            throw new ExtendedError(`Command "${command.name}" signature algorithm (${signature.algorithm}) doesn't support`);
+            throw new SignatureInvalidError(`Command "${command.name}" signature algorithm (${signature.algorithm}) doesn't support`);
         }
 
         let isVerified = await TransportCryptoManager.verify(command, manager, signature);
         if (!isVerified) {
-            throw new ExtendedError(`Command "${command.name}" has invalid signature`);
+            throw new SignatureInvalidError(`Command "${command.name}" has invalid signature`);
         }
     }
 
-    protected async executeCommand<U>(chaincodeStub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub, command: ITransportCommand<U>): Promise<void> {
+    protected async executeCommand<U>(chaincodeStub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, stub: IStub, command: ITransportCommand<U>): Promise<void> {
         await this.commandResponseRequestDispatch(command, payload.options, payload.isNeedReply);
     }
 
-    protected createCommand<U>(payload: ITransportFabricRequestPayload<U>, stub: ITransportFabricStub): ITransportCommand<U> {
+    protected createCommand<U>(payload: ITransportFabricRequestPayload<U>, stub: IStub): ITransportCommand<U> {
         let factory = this.getSettingsValue('commandFactory', this.defaultCreateCommandFactory);
         let command = factory(payload);
         return new TransportFabricChaincodeCommandWrapper(payload, command, stub);
     }
 
-    protected createStub<U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver): ITransportFabricStub {
+    protected createStub<U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver): IStub {
         return this.getSettingsValue('stubFactory', this.defaultCreateStubFactory)(logger, stub, payload, transport);
     }
 
@@ -167,7 +169,7 @@ export interface ITransportFabricChaincodeSettings extends ITransportSettings {
     cryptoManagers?: Array<ITransportCryptoManager>;
     nonSignedCommands?: Array<string>;
 
-    stubFactory?: <U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => ITransportFabricStub;
+    stubFactory?: <U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => IStub;
     commandFactory?: <U>(payload: ITransportFabricRequestPayload<U>) => ITransportCommand<U>;
 }
 

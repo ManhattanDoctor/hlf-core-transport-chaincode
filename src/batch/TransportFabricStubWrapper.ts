@@ -1,10 +1,10 @@
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
-import { ITransportEvent, ExtendedError, ILogger, TransformUtil, ObjectUtil, ITransportReceiver } from '@ts-core/common';
+import { ITransportEvent, ExtendedError, ILogger, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub, Iterators } from 'fabric-shim';
-import * as _ from 'lodash';
-import { ITransportFabricEvents, TransportFabricStub } from '../stub/TransportFabricStub';
-import { IKeyValue } from '../stub/ITransportFabricStub';
+import { ITransportFabricEvents, TransportFabricStub } from '../stub';
 import { GetStateRaw, StateProxy } from './StateProxy';
+import { IKeyValue } from '@hlf-core/common';
+import * as _ from 'lodash';
 
 export class TransportFabricStubWrapper extends TransportFabricStub {
     // --------------------------------------------------------------------------

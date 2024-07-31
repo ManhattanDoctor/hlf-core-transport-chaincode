@@ -1,11 +1,10 @@
-import { ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
+import { LoggerWrapper, ILogger, ExtendedError, TweetNaCl, ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
-import { IKeyValue, IPutStateOptions, ITransportFabricStub } from './ITransportFabricStub';
-import { LoggerWrapper, ILogger, ExtendedError, TweetNaCl } from '@ts-core/common';
+import { IKeyValue, IPutStateOptions, IStub } from '@hlf-core/common';
 import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
 import * as _ from 'lodash';
 
-export class TransportFabricStub extends LoggerWrapper implements ITransportFabricStub {
+export class TransportFabricStub extends LoggerWrapper implements IStub {
     // --------------------------------------------------------------------------
     //
     //  Static Methods
@@ -80,7 +79,7 @@ export class TransportFabricStub extends LoggerWrapper implements ITransportFabr
         if (ObjectUtil.hasOwnProperty(item, 'toDate')) {
             this._transactionDate = item.toDate();
         } else if (ObjectUtil.hasOwnProperties(item, ['seconds', 'nanos'])) {
-            this._transactionDate = new Date(item.seconds * DateUtil.MILLISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILISECONDS_NANOSECOND));
+            this._transactionDate = new Date(item.seconds * DateUtil.MILLISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILLISECONDS_NANOSECOND));
         }
     }
 

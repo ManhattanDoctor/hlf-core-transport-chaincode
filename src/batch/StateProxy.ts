@@ -1,6 +1,6 @@
 import { LoggerWrapper, ILogger, ArrayUtil } from '@ts-core/common';
+import { IKeyValue } from '@hlf-core/common';
 import * as _ from 'lodash';
-import { IKeyValue } from '../stub';
 
 export class StateProxy extends LoggerWrapper {
     // --------------------------------------------------------------------------

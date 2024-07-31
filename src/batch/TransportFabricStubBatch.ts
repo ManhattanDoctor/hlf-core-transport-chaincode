@@ -1,11 +1,11 @@
-import * as _ from 'lodash';
 import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
+import { IKeyValue } from '@hlf-core/common';
+import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
 import { ITransportCommand, ITransportEvent, ValidateUtil, Transport, ILogger } from '@ts-core/common';
 import { StateProxy } from './StateProxy';
-import { TransportFabricStub } from '../stub/TransportFabricStub';
-import { IKeyValue } from '../stub/ITransportFabricStub';
-import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
+import { TransportFabricStub } from '../stub';
+import * as _ from 'lodash';
 
 export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     // --------------------------------------------------------------------------
@@ -128,5 +128,4 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         await this.commit();
         return super.destroyAsync();
     }
-
 }

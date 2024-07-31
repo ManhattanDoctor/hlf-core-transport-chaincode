@@ -1,16 +1,16 @@
 import { ExtendedError, ITransportCommand, ITransportCommandAsync, Transport } from '@ts-core/common';
-import * as _ from 'lodash';
-import { ITransportFabricStub, ITransportFabricStubHolder } from './stub';
 import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
+import { IStub, IStubHolder } from '@hlf-core/common';
+import * as _ from 'lodash';
 
-export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements ITransportCommandAsync<U, V>, ITransportFabricStubHolder {
+export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements ITransportCommandAsync<U, V>, IStubHolder {
     // --------------------------------------------------------------------------
     //
     //  Properties
     //
     // --------------------------------------------------------------------------
 
-    protected _stub: ITransportFabricStub;
+    protected _stub: IStub;
 
     protected payload: ITransportFabricRequestPayload<U>;
     protected command: ITransportCommand<U>;
@@ -21,7 +21,7 @@ export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements
     //
     // --------------------------------------------------------------------------
 
-    constructor(payload: ITransportFabricRequestPayload<U>, command: ITransportCommand<U>, stub: ITransportFabricStub) {
+    constructor(payload: ITransportFabricRequestPayload<U>, command: ITransportCommand<U>, stub: IStub) {
         this._stub = stub;
 
         this.payload = payload;
@@ -54,7 +54,7 @@ export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements
     //
     // --------------------------------------------------------------------------
 
-    public get stub(): ITransportFabricStub {
+    public get stub(): IStub {
         return this._stub;
     }
 
