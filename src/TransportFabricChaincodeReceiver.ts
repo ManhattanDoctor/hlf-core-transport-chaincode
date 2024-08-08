@@ -14,9 +14,11 @@ import {
     ITransportReceiver,
     TransportImpl,
     DateUtil,
+    MathUtil,
     ObjectUtil,
     TransportCryptoManager
 } from '@ts-core/common';
+import { isNumberString } from 'class-validator';
 import { ChaincodeStub } from 'fabric-shim';
 import { TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
@@ -53,7 +55,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
 
             command = this.createCommand(payload, stub);
             if (!this.isNonSignedCommand(command)) {
-                await this.validateSignature(command, payload.options.signature);
+                await this.validateSignature(stub, command, payload);
             }
         } catch (error) {
             error = ExtendedError.create(error);
@@ -121,12 +123,10 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         return !_.isEmpty(items) && items.includes(command.name);
     }
 
-    protected async validateSignature<U>(command: ITransportCommand<U>, signature: ISignature): Promise<void> {
+    protected async validateSignature<U>(stub: IStub, command: ITransportCommand<U>, payload: ITransportFabricRequestPayload<U>): Promise<void> {
+        let signature = payload.options.signature;
         if (_.isNil(signature)) {
             throw new SignatureInvalidError(`Command "${command.name}" has nil signature`);
-        }
-        if (_.isNil(signature.nonce)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid nonce`);
         }
         if (_.isNil(signature.algorithm)) {
             throw new SignatureInvalidError(`Command "${command.name}" signature has invalid algorithm`);
@@ -134,6 +134,8 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         if (_.isNil(signature.publicKey)) {
             throw new SignatureInvalidError(`Command "${command.name}" signature has invalid publicKey`);
         }
+        
+        await this.validateNonce(stub, command, payload);
 
         let manager = _.find(this.settings.cryptoManagers, { algorithm: signature.algorithm });
         if (_.isNil(manager)) {
@@ -143,6 +145,25 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         let isVerified = await TransportCryptoManager.verify(command, manager, signature);
         if (!isVerified) {
             throw new SignatureInvalidError(`Command "${command.name}" has invalid signature`);
+        }
+    }
+
+    protected async validateNonce<U>(stub: IStub, command: ITransportCommand<U>, payload: ITransportFabricRequestPayload<U>): Promise<void> {
+        let signature = payload.options.signature;
+        if (_.isNil(signature.nonce)) {
+            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid nonce`);
+        }
+        if (!isNumberString(signature.nonce)) {
+            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be numeric string`);
+        }
+
+        let key = `→${stub.userId}~nonce`;
+        let nonce = await stub.getStateRaw(key);
+        if (!_.isNil(nonce) && !MathUtil.greaterThan(signature.nonce, nonce)) {
+            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be granter than`);
+        }
+        if (!payload.isReadonly) {
+            await stub.putStateRaw(key, signature.nonce);
         }
     }
 

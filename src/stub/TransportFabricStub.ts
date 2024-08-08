@@ -125,7 +125,7 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         if (_.isNil(type) || _.isNil(value)) {
             return value;
         }
-        return TransformUtil.toClass<U>(type, value);;
+        return TransformUtil.toClass<U>(type, value);
     }
 
     public async getStateRaw(key: string): Promise<string> {
