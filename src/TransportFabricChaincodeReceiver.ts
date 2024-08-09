@@ -5,7 +5,6 @@ import {
     ITransportCommand,
     ITransportEvent,
     ITransportCommandRequest,
-    ISignature,
     TransportLogType,
     ITransportCryptoManager,
     ITransportSettings,
@@ -19,15 +18,25 @@ import {
     TransportCryptoManager
 } from '@ts-core/common';
 import { isNumberString } from 'class-validator';
-import { ChaincodeStub } from 'fabric-shim';
 import { TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import { IStub } from '@hlf-core/common';
-import * as _ from 'lodash';
 import { SignatureInvalidError } from './ErrorCode';
+import { ChaincodeStub } from 'fabric-shim';
+import * as _ from 'lodash';
 
 export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends TransportImpl<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
+    // --------------------------------------------------------------------------
+    //
+    //  Static Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public static createNonceKey(userId: string): string {
+        return `→${userId}~nonce`;
+    }
+
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -134,7 +143,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
         if (_.isNil(signature.publicKey)) {
             throw new SignatureInvalidError(`Command "${command.name}" signature has invalid publicKey`);
         }
-        
+
         await this.validateNonce(stub, command, payload);
 
         let manager = _.find(this.settings.cryptoManagers, { algorithm: signature.algorithm });
@@ -157,10 +166,10 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be numeric string`);
         }
 
-        let key = `→${stub.userId}~nonce`;
-        let nonce = await stub.getStateRaw(key);
-        if (!_.isNil(nonce) && !MathUtil.greaterThan(signature.nonce, nonce)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be granter than`);
+        let key = TransportFabricChaincodeReceiver.createNonceKey(stub.userId);
+        let item = await stub.getStateRaw(key);
+        if (!_.isNil(item) && !MathUtil.greaterThan(signature.nonce, item)) {
+            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be granter than ${item}`);
         }
         if (!payload.isReadonly) {
             await stub.putStateRaw(key, signature.nonce);
