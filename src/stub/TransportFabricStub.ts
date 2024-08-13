@@ -1,7 +1,7 @@
-import { LoggerWrapper, ILogger, ExtendedError, TweetNaCl, ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
+import { ITransportCommand, ITransportCommandAsync, LoggerWrapper, ILogger, ExtendedError, TweetNaCl, ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
-import { IKeyValue, IPutStateOptions, IStub } from '@hlf-core/common';
-import { ITransportFabricCommandOptions, TRANSPORT_CHAINCODE_EVENT } from '@hlf-core/transport-common';
+import { IKeyValue, IPutStateOptions, IStub, ITransportCommandInvokeOptions } from '@hlf-core/common';
+import { ITransportFabricCommandOptions, ITransportFabricRequestPayload, TRANSPORT_CHAINCODE_EVENT, TRANSPORT_FABRIC_METHOD, TransportFabricCommandOptions, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import * as _ from 'lodash';
 
 export class TransportFabricStub extends LoggerWrapper implements IStub {
@@ -173,6 +173,60 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
 
     // --------------------------------------------------------------------------
     //
+    //  Transport Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public invokeChaincode(chaincode: string, args: Array<string>, channel: string): Promise<any> {
+        return this.stub.invokeChaincode(chaincode, args, channel);
+    }
+
+    public invokeSend<U>(command: ITransportCommand<U>, options: ITransportCommandInvokeOptions): void {
+        let request = this.createRequestPayload(command, options, false);
+        TransportFabricRequestPayload.clear(request);
+
+        this.stub.invokeChaincode(options.chaincode, [TRANSPORT_FABRIC_METHOD, TransformUtil.fromJSON(TransformUtil.fromClass(request))], options.channel);
+    }
+
+    public async invokeSendListen<U, V>(command: ITransportCommandAsync<U, V>, options: ITransportCommandInvokeOptions): Promise<V> {
+        let request = this.createRequestPayload(command, options, false);
+        TransportFabricRequestPayload.clear(request);
+
+        let item = await this.stub.invokeChaincode(options.chaincode, [TRANSPORT_FABRIC_METHOD, TransformUtil.fromJSON(TransformUtil.fromClass(request))], options.channel);
+        let payload: TransportFabricResponsePayload = TransportFabricResponsePayload.parse(Buffer.from(item.payload));
+        return payload.response;
+    }
+
+    protected createRequestPayload<U>(command: ITransportCommand<U>, options: ITransportFabricCommandOptions, isNeedReply: boolean): ITransportFabricRequestPayload<U> {
+        let item = new TransportFabricRequestPayload<U>();
+        item.id = command.id;
+        item.name = command.name;
+        item.options = TransformUtil.toClass(TransportFabricCommandOptions, options);
+        if (!_.isNil(command.request)) {
+            item.request = command.request;
+        }
+        if (this.isCommandReadonly(command)) {
+            item.isReadonly = true;
+        }
+        if (isNeedReply) {
+            item.isNeedReply = isNeedReply;
+        }
+        ValidateUtil.validate(item);
+        return item;
+    }
+
+    protected isCommandReadonly<U>(command: ITransportCommand<U>): boolean {
+        if (ObjectUtil.hasOwnProperty(command, 'isQuery')) {
+            return command['isQuery'] === true;
+        }
+        if (ObjectUtil.hasOwnProperty(command, 'isReadonly')) {
+            return command['isReadonly'] === true;
+        }
+        return false;
+    }
+
+    // --------------------------------------------------------------------------
+    //
     //  Public Key Value
     //
     // --------------------------------------------------------------------------
@@ -257,4 +311,5 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
 export interface ITransportFabricEvents {
     [transactionHash: string]: Array<ITransportEvent<any>>;
 }
+
 
