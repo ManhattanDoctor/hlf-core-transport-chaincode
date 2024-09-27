@@ -1,10 +1,10 @@
-import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
 import { IKeyValue } from '@hlf-core/common';
 import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
 import { ITransportCommand, ITransportEvent, ValidateUtil, Transport, ILogger } from '@ts-core/common';
-import { StateProxy } from './StateProxy';
+import { StateProxy } from '../state';
 import { TransportFabricStub } from '../stub';
+import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
 import * as _ from 'lodash';
 
 export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
@@ -15,7 +15,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     // --------------------------------------------------------------------------
 
     protected state: StateProxy;
-    protected wrapper: TransportFabricStubWrapper;
+    protected wrapper: TransportFabricStubBatchEventWrapper;
 
     // It needs for check response and commit temporary state
     public command: ITransportCommand<U>;
@@ -26,14 +26,12 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: ILogger, transactionHash: string, transactionDate: Date, wrapper: TransportFabricStubWrapper, payload: ITransportFabricRequestPayload) {
+    constructor(logger: ILogger, transactionHash: string, transactionDate: Date, wrapper: TransportFabricStubBatchEventWrapper, payload: ITransportFabricRequestPayload) {
         super(logger, null, payload.id, payload.options, null);
         this.wrapper = wrapper;
-
         this.state = new StateProxy(logger, this.getStateRawProxy);
 
-        this._transactionHash = transactionHash;
-        this._transactionDate = transactionDate;
+        this._transaction = { hash: transactionHash, date: transactionDate };
     }
 
     // --------------------------------------------------------------------------
@@ -47,7 +45,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
             return;
         }
         if (!_.isEmpty(this.eventsToDispatch)) {
-            this.wrapper.putEvent(this.transactionHash, this.eventsToDispatch);
+            this.wrapper.putEvent(this.transaction.hash, this.eventsToDispatch);
         }
         for (let key of this.state.toRemove) {
             await this.wrapper.removeState(key);

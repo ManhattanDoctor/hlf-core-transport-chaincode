@@ -2,13 +2,13 @@ import { ChaincodeStub } from 'fabric-shim';
 import { ITransportFabricChaincodeSettings, TransportFabricChaincodeReceiver } from '../TransportFabricChaincodeReceiver';
 import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
-import { TransportFabricStubWrapper } from './TransportFabricStubWrapper';
 import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
 import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 import { NoCommandsToBatchError } from './NoCommandsToBatchError';
 import { DatabaseManager, IKeyValue, IStub } from '@hlf-core/common';
 import { BatchInvalidError } from '../ErrorCode';
 import * as _ from 'lodash';
+import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {
     // --------------------------------------------------------------------------
@@ -58,7 +58,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             throw new NoCommandsToBatchError();
         }
 
-        let wrapper = new TransportFabricStubWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
+        let wrapper = new TransportFabricStubBatchEventWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         let response = {} as ITransportFabricBatchDto;
         for (let item of commands) {
             let response = {} as any;
@@ -85,7 +85,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         await stub.putState(this.toBatchKey(stub, command), payload, {});
     }
 
-    protected async batchCommand<U>(item: IKeyValue, stubOriginal: ChaincodeStub, wrapper: TransportFabricStubWrapper): Promise<TransportFabricResponsePayload<U>> {
+    protected async batchCommand<U>(item: IKeyValue, stubOriginal: ChaincodeStub, wrapper: TransportFabricStubBatchEventWrapper): Promise<TransportFabricResponsePayload<U>> {
         let payload = TransformUtil.toClass<ITransportFabricRequestPayload<U>>(TransportFabricRequestPayload, TransformUtil.toJSON(item.value));
         let stub = new TransportFabricStubBatch(this.logger, this.batchKeyToHash(item.key), this.batchKeyToDate(item.key), wrapper, payload);
         let command = this.createCommand(payload, stub);
@@ -108,7 +108,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         if (!_.isNumber(this.settings.batch.timeout)) {
             return;
         }
-        let time = stub.transactionDate.getTime();
+        let time = stub.transaction.date.getTime();
         if (_.isNumber(this.batchLastTime) && time - this.batchLastTime < this.settings.batch.timeout) {
             throw new BatchInvalidError(`Batch command timeout is not exceeded`);
         }
@@ -153,8 +153,8 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     }
 
     protected toBatchKey<U>(stub: IStub, command: ITransportCommand<U>): string {
-        let time = stub.transactionDate.getTime();
-        return `${TransportFabricChaincodeReceiverBatch.PREFIX}/${_.padStart(time.toString(), 14, '0')}/${stub.transactionHash}/${command.id}`;
+        let time = stub.transaction.date.getTime();
+        return `${TransportFabricChaincodeReceiverBatch.PREFIX}/${_.padStart(time.toString(), 14, '0')}/${stub.transaction.hash}/${command.id}`;
     }
 }
 

@@ -34,7 +34,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     // --------------------------------------------------------------------------
 
     public static createNonceKey(userId: string): string {
-        return `→${userId}~nonce`;
+        return `→nonce~${userId}`;
     }
 
     // --------------------------------------------------------------------------
@@ -43,9 +43,9 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     //
     // --------------------------------------------------------------------------
 
-    protected defaultCreateStubFactory = <U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => new TransportFabricStub(logger, stub, payload.id, payload.options, transport);
+    public createStubFactory = <U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver) => new TransportFabricStub(logger, stub, payload.id, payload.options, transport);
 
-    protected defaultCreateCommandFactory = <U>(item: ITransportFabricRequestPayload<U>) => new TransportCommandAsync(item.name, item.request, item.id);
+    public createCommandFactory = <U>(item: ITransportFabricRequestPayload<U>) => new TransportCommandAsync(item.name, item.request, item.id);
 
     // --------------------------------------------------------------------------
     //
@@ -166,7 +166,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be numeric string`);
         }
 
-        let key = TransportFabricChaincodeReceiver.createNonceKey(stub.userId);
+        let key = TransportFabricChaincodeReceiver.createNonceKey(stub.user.id);
         let item = await stub.getStateRaw(key);
         if (!_.isNil(item) && !MathUtil.greaterThan(signature.nonce, item)) {
             throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be granter than ${item}`);
@@ -181,13 +181,13 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     }
 
     protected createCommand<U>(payload: ITransportFabricRequestPayload<U>, stub: IStub): ITransportCommand<U> {
-        let factory = this.getSettingsValue('commandFactory', this.defaultCreateCommandFactory);
+        let factory = this.getSettingsValue('commandFactory', this.createCommandFactory);
         let command = factory(payload);
         return new TransportFabricChaincodeCommandWrapper(payload, command, stub);
     }
 
     protected createStub<U>(logger: ILogger, stub: ChaincodeStub, payload: ITransportFabricRequestPayload<U>, transport: ITransportReceiver): IStub {
-        return this.getSettingsValue('stubFactory', this.defaultCreateStubFactory)(logger, stub, payload, transport);
+        return this.getSettingsValue('stubFactory', this.createStubFactory)(logger, stub, payload, transport);
     }
 
     protected createResponsePayload<U, V = any>(command: ITransportCommand<U>): ITransportFabricResponsePayload<V> {

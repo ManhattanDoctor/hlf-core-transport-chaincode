@@ -1,6 +1,6 @@
 import { ITransportCommand, ITransportCommandAsync, LoggerWrapper, ILogger, ExtendedError, TweetNaCl, ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
-import { IKeyValue, IPutStateOptions, IStub, ITransportCommandInvokeOptions } from '@hlf-core/common';
+import { IKeyValue, IPutStateOptions, IStub, IStubTransaction, IStubUser, ITransportCommandInvokeOptions } from '@hlf-core/common';
 import { ITransportFabricCommandOptions, ITransportFabricRequestPayload, TRANSPORT_CHAINCODE_EVENT, TRANSPORT_FABRIC_METHOD, TransportFabricCommandOptions, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import * as _ from 'lodash';
 
@@ -32,12 +32,11 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
 
     protected _stub: ChaincodeStub;
 
+    protected _channel: string;
     protected _requestId: string;
-    protected _transactionHash: string;
-    protected _transactionDate: Date;
 
-    protected _userId: string;
-    protected _userPublicKey: string;
+    protected _user: IStubUser;
+    protected _transaction: IStubTransaction;
 
     protected options: ITransportFabricCommandOptions;
     protected transport: ITransportReceiver;
@@ -73,26 +72,27 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     // --------------------------------------------------------------------------
 
     protected commitStubProperties(): void {
-        this._transactionHash = this.stub.getTxID();
+        this._channel = this.stub.getChannelID();
+        this._transaction = { hash: this.stub.getTxID(), date: null };
 
         let item = this.stub.getTxTimestamp() as any;
         if (ObjectUtil.hasOwnProperty(item, 'toDate')) {
-            this._transactionDate = item.toDate();
+            this._transaction.date = item.toDate();
         } else if (ObjectUtil.hasOwnProperties(item, ['seconds', 'nanos'])) {
-            this._transactionDate = new Date(item.seconds * DateUtil.MILLISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILLISECONDS_NANOSECOND));
+            this._transaction.date = new Date(item.seconds * DateUtil.MILLISECONDS_SECOND + Math.round(item.nanos * DateUtil.MILLISECONDS_NANOSECOND));
         }
     }
 
     protected commitOptionsProperties(): void {
-        this._userId = this.options.userId;
+        this._user = { id: this.options.userId, publicKey: null };
         if (!_.isNil(this.options.signature)) {
-            this._userPublicKey = this.options.signature.publicKey;
+            this._user.publicKey = this.options.signature.publicKey;
         }
     }
 
     protected dispatchEvents(): void {
         if (!_.isEmpty(this.eventsToDispatch)) {
-            this.setEvent(TransportFabricStub.setEvents({}, this.transactionHash, this.eventsToDispatch));
+            this.setEvent(TransportFabricStub.setEvents({}, this.transaction.hash, this.eventsToDispatch));
         }
     }
 
@@ -109,6 +109,9 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         this.dispatchEvents();
 
         this._stub = null;
+        this._user = null;
+        this._transaction = null;
+
         this.options = null;
         this.transport = null;
         this.eventsToDispatch = null;
@@ -287,24 +290,16 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         return this._stub;
     }
 
-    public get userId(): string {
-        return this._userId;
-    }
-
     public get requestId(): string {
         return this._requestId;
     }
 
-    public get userPublicKey(): string {
-        return this._userPublicKey;
+    public get user(): IStubUser {
+        return this._user;
     }
 
-    public get transactionHash(): string {
-        return this._transactionHash;
-    }
-
-    public get transactionDate(): Date {
-        return this._transactionDate;
+    public get transaction(): IStubTransaction {
+        return this._transaction;
     }
 }
 
