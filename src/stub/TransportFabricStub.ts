@@ -57,11 +57,11 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         this.transport = transport;
         this.eventsToDispatch = new Array();
 
-        if (!_.isNil(this.options)) {
-            this.commitOptionsProperties();
-        }
-        if (!_.isNil(this.stub)) {
+        if (!_.isNil(stub)) {
             this.commitStubProperties();
+        }
+        if (!_.isNil(options)) {
+            this.commitOptionsProperties();
         }
     }
 
