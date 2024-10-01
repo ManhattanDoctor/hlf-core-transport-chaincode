@@ -170,6 +170,10 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         return !_.isNil(await this.getStateRaw(key));
     }
 
+    public async hasNotState(key: string): Promise<boolean> {
+        return _.isNil(await this.getStateRaw(key));
+    }
+
     public async removeState(key: string): Promise<void> {
         return this.stub.deleteState(key);
     }

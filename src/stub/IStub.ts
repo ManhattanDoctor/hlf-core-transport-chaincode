@@ -25,6 +25,7 @@ export interface IStub {
     putStateRaw(key: string, value: string): Promise<void>;
 
     hasState(key: string): Promise<boolean>;
+    hasNotState(key: string): Promise<boolean>;
     removeState(key: string): Promise<void>;
 
     dispatch<T>(event: ITransportEvent<T>): Promise<void>;
