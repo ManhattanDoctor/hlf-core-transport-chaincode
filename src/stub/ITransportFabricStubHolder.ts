@@ -1,5 +1,5 @@
 import { ExtendedError } from '@ts-core/common';
-import { IStubHolder } from '@hlf-core/common';
+import { IStubHolder } from './IStubHolder';
 import * as _ from 'lodash';
 import 'reflect-metadata';
 

@@ -18,10 +18,9 @@ import {
     TransportCryptoManager
 } from '@ts-core/common';
 import { isNumberString } from 'class-validator';
-import { TransportFabricStub } from './stub';
+import { IStub, TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { IStub } from '@hlf-core/common';
 import { SignatureInvalidError } from './ErrorCode';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';

@@ -1,6 +1,6 @@
 import { ITransportCommand, ITransportCommandAsync, LoggerWrapper, ILogger, ExtendedError, TweetNaCl, ITransportEvent, ITransportReceiver, TransformUtil, IPageBookmark, IPaginationBookmark, ClassType, ValidateUtil, ObjectUtil, DateUtil } from '@ts-core/common';
 import { ChaincodeStub, Iterators, StateQueryResponse } from 'fabric-shim';
-import { IKeyValue, IPutStateOptions, IStub, IStubTransaction, IStubUser, ITransportCommandInvokeOptions } from '@hlf-core/common';
+import { IKeyValue, IPutStateOptions, IStub, IStubTransaction, IStubUser, ITransportCommandInvokeOptions } from '../stub';
 import { ITransportFabricCommandOptions, ITransportFabricRequestPayload, TRANSPORT_CHAINCODE_EVENT, TRANSPORT_FABRIC_METHOD, TransportFabricCommandOptions, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import * as _ from 'lodash';
 

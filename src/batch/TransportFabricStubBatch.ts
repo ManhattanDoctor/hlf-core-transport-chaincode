@@ -1,10 +1,10 @@
-import { Iterators, StateQueryResponse } from 'fabric-shim';
-import { IKeyValue } from '@hlf-core/common';
+
 import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
 import { ITransportCommand, ITransportEvent, ValidateUtil, Transport, ILogger } from '@ts-core/common';
-import { StateProxy } from '../state';
-import { TransportFabricStub } from '../stub';
 import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
+import { TransportFabricStub, IKeyValue } from '../stub';
+import { StateProxy } from '../state';
+import { Iterators, StateQueryResponse } from 'fabric-shim';
 import * as _ from 'lodash';
 
 export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
