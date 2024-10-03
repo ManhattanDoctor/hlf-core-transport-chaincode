@@ -109,10 +109,8 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         return this.wrapper.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
     }
 
-    public async dispatch<T>(value: ITransportEvent<T>, isNeedValidate: boolean = true): Promise<void> {
-        if (isNeedValidate) {
-            ValidateUtil.validate(value);
-        }
+    public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
+        ValidateUtil.validate(value);
         this.eventsToDispatch.push(value);
     }
 

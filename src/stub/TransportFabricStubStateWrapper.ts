@@ -1,7 +1,7 @@
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
-import { ITransportEvent, ExtendedError, ILogger, ITransportReceiver } from '@ts-core/common';
-import { ChaincodeStub, Iterators } from 'fabric-shim';
-import { IKeyValue, TransportFabricStub } from '../stub';
+import { ILogger, ITransportReceiver } from '@ts-core/common';
+import { ChaincodeStub } from 'fabric-shim';
+import { IKeyValue, StateQueryIterator, TransportFabricStub } from '../stub';
 import { GetStateRaw, StateProxy } from '../state';
 import * as _ from 'lodash';
 
@@ -60,7 +60,7 @@ export class TransportFabricStubStateProxy extends TransportFabricStub {
     //
     // --------------------------------------------------------------------------
 
-    public async loadKV(iterator: Iterators.StateQueryIterator): Promise<Array<IKeyValue>> {
+    public async loadKV(iterator: StateQueryIterator): Promise<Array<IKeyValue>> {
         let items = await super.loadKV(iterator);
         this.state.checkKV(items);
         return items;
@@ -76,10 +76,6 @@ export class TransportFabricStubStateProxy extends TransportFabricStub {
 
     public async removeState(key: string): Promise<void> {
         this.state.removeState(key);
-    }
-
-    public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
-        throw new ExtendedError(`Can't dispatch event directly, use TransportFabricStubBatch`);
     }
 
     public async destroyAsync(): Promise<void> {

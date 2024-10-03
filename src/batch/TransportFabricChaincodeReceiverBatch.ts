@@ -54,30 +54,32 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     }
 
     protected async batch<U>(stubOriginal: ChaincodeStub, stub: IStub, payload: TransportFabricRequestPayload<U>): Promise<ITransportFabricBatchDto> {
-        let commands = await DatabaseManager.getKV(stub, TransportFabricChaincodeReceiverBatch.PREFIX);
-        if (_.isEmpty(commands)) {
+        let kvs = await DatabaseManager.getKV(stub, TransportFabricChaincodeReceiverBatch.PREFIX);
+        if (_.isEmpty(kvs)) {
             throw new NoCommandsToBatchError();
         }
 
+        console.log('Commands to batch', kvs);
+
         let wrapper = new TransportFabricStubBatchEventWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
-        let response = {} as ITransportFabricBatchDto;
-        for (let item of commands) {
+        let item = {} as ITransportFabricBatchDto;
+        for (let kv of kvs) {
             let response = {} as any;
             try {
-                response = await this.batchCommand(item, stubOriginal, wrapper);
+                response = await this.batchCommand(kv, stubOriginal, wrapper);
             } catch (error) {
                 this.error(`Unable to execute batched command: ${error.message}`);
-                error = ExtendedError.create(error);
-                response = TransformUtil.fromClass(error);
+                response = TransformUtil.fromClass(ExtendedError.create(error));
             } finally {
-                response[this.batchKeyToHash(item.key)] = response;
+                item[this.batchKeyToHash(kv.key)] = response;
+                console.log(`Command "${this.batchKeyToHash(kv.key)}"response:`, response);
             }
         }
         await wrapper.destroyAsync();
-        for (let item of commands) {
-            await stub.removeState(item.key);
+        for (let { key } of kvs) {
+            await stub.removeState(key);
         }
-        return ObjectUtil.sortKeys(response, true);
+        return ObjectUtil.sortKeys(item, true);
     }
 
     protected async batchAdd<U>(payload: TransportFabricRequestPayload<U>, stub: IStub, command: ITransportCommand<U>): Promise<void> {

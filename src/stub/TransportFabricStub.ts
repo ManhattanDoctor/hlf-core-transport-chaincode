@@ -4,6 +4,8 @@ import { IKeyValue, IPutStateOptions, IStub, IStubTransaction, IStubUser, ITrans
 import { ITransportFabricCommandOptions, ITransportFabricRequestPayload, TRANSPORT_CHAINCODE_EVENT, TRANSPORT_FABRIC_METHOD, TransportFabricCommandOptions, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import * as _ from 'lodash';
 
+export type StateQueryIterator = Iterators.StateQueryIterator;
+
 export class TransportFabricStub extends LoggerWrapper implements IStub {
     // --------------------------------------------------------------------------
     //
@@ -136,11 +138,11 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         return !_.isNil(item) && item.length > 0 ? Buffer.from(item).toString(TransformUtil.ENCODING) : null;
     }
 
-    public async getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
+    public async getStateByRange(startKey: string, endKey: string): Promise<StateQueryIterator> {
         return this.stub.getStateByRange(startKey, endKey);
     }
 
-    public async getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
+    public async getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<StateQueryIterator>> {
         return this.stub.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
     }
 
@@ -238,7 +240,7 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     //
     // --------------------------------------------------------------------------
 
-    public async loadKV(iterator: Iterators.StateQueryIterator): Promise<Array<IKeyValue>> {
+    public async loadKV(iterator: StateQueryIterator): Promise<Array<IKeyValue>> {
         let items = [];
         while (true) {
             let response = await iterator.next();

@@ -43,7 +43,7 @@ export class DatabaseManager extends LoggerWrapper {
         return start + DatabaseManager.LAST_KEY;
     }
 
-    public static async has(stub: IStub, item: string): Promise<boolean> {
+    public static has(stub: IStub, item: string): Promise<boolean> {
         return stub.hasState(item);
     }
 
@@ -72,23 +72,23 @@ export class DatabaseManager extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async getKV(start: string, finish?: string): Promise<Array<IKeyValue>> {
+    public getKV(start: string, finish?: string): Promise<Array<IKeyValue>> {
         return DatabaseManager.getKV(this.stub, start, finish);
     }
 
-    public async removeKV(start: string, finish?: string): Promise<void> {
+    public removeKV(start: string, finish?: string): Promise<void> {
         return DatabaseManager.removeKV(this.stub, start, finish);
     }
 
-    public async getPaginatedKV(request: IPageBookmark, start: string, finish?: string): Promise<IPaginationBookmark<IKeyValue>> {
+    public getPaginatedKV(request: IPageBookmark, start: string, finish?: string): Promise<IPaginationBookmark<IKeyValue>> {
         return DatabaseManager.getPaginatedKV(this.stub, request, start, finish);
     }
 
-    public async getKeys(start: string, finish?: string): Promise<Array<string>> {
+    public getKeys(start: string, finish?: string): Promise<Array<string>> {
         return DatabaseManager.getKeys(this.stub, start, finish);
     }
 
-    public async getValues(start: string, finish?: string): Promise<Array<string>> {
+    public getValues(start: string, finish?: string): Promise<Array<string>> {
         return DatabaseManager.getValues(this.stub, start, finish);
     }
 
