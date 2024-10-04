@@ -34,7 +34,6 @@ export class TransportFabricStubBatchEventWrapper extends TransportFabricStubSta
         if (_.isNil(this.events) || this.events.size === 0) {
             return;
         }
-
         let item: ITransportFabricEvents = {};
         this.events.forEach((events, transactionHash) => TransportFabricStub.setEvents(item, transactionHash, events));
         this.setEvent(item);

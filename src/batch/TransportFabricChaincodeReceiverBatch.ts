@@ -72,7 +72,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 response = TransformUtil.fromClass(ExtendedError.create(error));
             } finally {
                 item[this.batchKeyToHash(kv.key)] = response;
-                console.log(`Command "${this.batchKeyToHash(kv.key)}"response:`, response);
+                console.log(`Command "${this.batchKeyToHash(kv.key)}" response:`, response);
             }
         }
         await wrapper.destroyAsync();

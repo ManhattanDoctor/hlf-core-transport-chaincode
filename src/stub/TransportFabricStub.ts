@@ -93,12 +93,17 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     }
 
     protected dispatchEvents(): void {
-        if (!_.isEmpty(this.eventsToDispatch)) {
-            this.setEvent(TransportFabricStub.setEvents({}, this.transaction.hash, this.eventsToDispatch));
+        if (_.isEmpty(this.eventsToDispatch)) {
+            return;
         }
+
+        let item: ITransportFabricEvents = {};
+        this.setEvent(TransportFabricStub.setEvents(item, this.transaction.hash, this.eventsToDispatch));
     }
 
     protected setEvent(item: ITransportFabricEvents): void {
+        console.log('Set events', item.length);
+        console.log(item);
         item = ObjectUtil.sortKeys(item, true);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
