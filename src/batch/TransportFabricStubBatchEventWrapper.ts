@@ -11,7 +11,7 @@ export class TransportFabricStubBatchEventWrapper extends TransportFabricStubSta
     //
     // --------------------------------------------------------------------------
 
-    protected events: Map<string, Array<ITransportEvent<any>>>;
+    protected transactions: Map<string, Array<ITransportEvent<any>>>;
 
     // --------------------------------------------------------------------------
     //
@@ -21,7 +21,7 @@ export class TransportFabricStubBatchEventWrapper extends TransportFabricStubSta
 
     constructor(logger: ILogger, stub: ChaincodeStub, requestId: string, options: ITransportFabricCommandOptions, transport: ITransportReceiver) {
         super(logger, stub, requestId, options, transport);
-        this.events = new Map();
+        this.transactions = new Map();
     }
 
     // --------------------------------------------------------------------------
@@ -31,23 +31,21 @@ export class TransportFabricStubBatchEventWrapper extends TransportFabricStubSta
     // --------------------------------------------------------------------------
 
     protected dispatchEvents(): void {
-        if (_.isNil(this.events) || this.events.size === 0) {
+        if (_.isNil(this.transactions) || this.transactions.size === 0) {
             return;
         }
         let item: ITransportFabricEvents = {};
-        this.events.forEach((events, transactionHash) => TransportFabricStub.setEvents(item, transactionHash, events));
+        this.transactions.forEach((events, transactionHash) => TransportFabricStub.setEvents(item, transactionHash, events));
         this.setEvent(item);
     }
-
 
     protected _destroy(): void {
         if (this.isDestroyed) {
             return;
         }
         super._destroy();
-
-        this.events.clear();
-        this.events = null;
+        this.transactions.clear();
+        this.transactions = null;
     }
 
     // --------------------------------------------------------------------------
@@ -56,11 +54,11 @@ export class TransportFabricStubBatchEventWrapper extends TransportFabricStubSta
     //
     // --------------------------------------------------------------------------
 
-    public putEvent<T>(transactionHash: string, items: Array<ITransportEvent<T>>): void {
-        if (this.events.has(transactionHash)) {
-            throw new ExtendedError(`Events for "${transactionHash}" already putted`);
+    public addEvent<T>(transaction: string, items: Array<ITransportEvent<T>>): void {
+        if (this.transactions.has(transaction)) {
+            throw new ExtendedError(`Events for "${transaction}" already putted`);
         }
-        this.events.set(transactionHash, items);
+        this.transactions.set(transaction, items);
     }
 
     public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {

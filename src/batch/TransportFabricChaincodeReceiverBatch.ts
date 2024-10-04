@@ -59,11 +59,11 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
             throw new NoCommandsToBatchError();
         }
 
-        console.log('Commands to batch', kvs);
-
-        let wrapper = new TransportFabricStubBatchEventWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
+        console.log('Called batch', kvs);
         let item = {} as ITransportFabricBatchDto;
+        let wrapper = new TransportFabricStubBatchEventWrapper(this.logger, stubOriginal, payload.id, payload.options, this);
         for (let kv of kvs) {
+            await stub.removeState(kv.key);
             let response = {} as any;
             try {
                 response = await this.batchCommand(kv, stubOriginal, wrapper);
@@ -71,14 +71,11 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
                 this.error(`Unable to execute batched command: ${error.message}`);
                 response = TransformUtil.fromClass(ExtendedError.create(error));
             } finally {
-                item[this.batchKeyToHash(kv.key)] = response;
                 console.log(`Command "${this.batchKeyToHash(kv.key)}" response:`, response);
+                item[this.batchKeyToHash(kv.key)] = response;
             }
         }
         await wrapper.destroyAsync();
-        for (let { key } of kvs) {
-            await stub.removeState(key);
-        }
         return ObjectUtil.sortKeys(item, true);
     }
 

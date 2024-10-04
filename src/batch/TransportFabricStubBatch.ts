@@ -44,8 +44,8 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
         if (Transport.isCommandAsync(this.command) && !_.isNil(this.command.error)) {
             return;
         }
-        if (!_.isEmpty(this.eventsToDispatch)) {
-            this.wrapper.putEvent(this.transaction.hash, this.eventsToDispatch);
+        if (!_.isEmpty(this.events)) {
+            this.wrapper.addEvent(this.transaction.hash, this.events);
         }
         for (let key of this.state.toRemove) {
             await this.wrapper.removeState(key);
@@ -94,11 +94,11 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     }
 
     public async putStateRaw(key: string, item: string): Promise<void> {
-        this.state.putState(key, item);
+        return this.state.putState(key, item);
     }
 
     public async removeState(key: string): Promise<void> {
-        this.state.removeState(key);
+        return this.state.removeState(key);
     }
 
     public async getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
@@ -111,7 +111,7 @@ export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
 
     public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
         ValidateUtil.validate(value);
-        this.eventsToDispatch.push(value);
+        this.events.push(value);
     }
 
     // --------------------------------------------------------------------------

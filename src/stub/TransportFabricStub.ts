@@ -13,14 +13,14 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     //
     // --------------------------------------------------------------------------
 
-    public static setEvents(item: ITransportFabricEvents, transactionHash: string, events: Array<ITransportEvent<any>>): ITransportFabricEvents {
-        if (_.isNil(transactionHash) || _.isEmpty(events)) {
+    public static setEvents(item: ITransportFabricEvents, transaction: string, events: Array<ITransportEvent<any>>): ITransportFabricEvents {
+        if (_.isNil(transaction) || _.isEmpty(events)) {
             return item;
         }
-        let items = item[transactionHash] = new Array();
+        let items = item[transaction] = new Array();
         for (let i = 0; i < events.length; i++) {
             let event = TransformUtil.fromClass(events[i]);
-            event.uid = TweetNaCl.hash(`${transactionHash}_${i}`);
+            event.uid = TweetNaCl.hash(`${transaction}_${i}`);
             items.push(event);
         }
         return item;
@@ -40,9 +40,9 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     protected _user: IStubUser;
     protected _transaction: IStubTransaction;
 
+    protected events: Array<ITransportEvent<any>>;
     protected options: ITransportFabricCommandOptions;
     protected transport: ITransportReceiver;
-    protected eventsToDispatch: Array<ITransportEvent<any>>;
 
     // --------------------------------------------------------------------------
     //
@@ -55,9 +55,9 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         this._stub = stub;
         this._requestId = requestId;
 
+        this.events = new Array();
         this.options = options;
         this.transport = transport;
-        this.eventsToDispatch = new Array();
 
         if (!_.isNil(stub)) {
             this.commitStubProperties();
@@ -93,18 +93,17 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
     }
 
     protected dispatchEvents(): void {
-        if (_.isEmpty(this.eventsToDispatch)) {
+        if (_.isEmpty(this.events)) {
             return;
         }
-
         let item: ITransportFabricEvents = {};
-        this.setEvent(TransportFabricStub.setEvents(item, this.transaction.hash, this.eventsToDispatch));
+        this.setEvent(TransportFabricStub.setEvents(item, this.transaction.hash, this.events));
     }
 
     protected setEvent(item: ITransportFabricEvents): void {
-        console.log('Set events', item.length);
-        console.log(item);
         item = ObjectUtil.sortKeys(item, true);
+        console.log('Set events');
+        console.log(item);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 
@@ -119,9 +118,9 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         this._user = null;
         this._transaction = null;
 
+        this.events = null;
         this.options = null;
         this.transport = null;
-        this.eventsToDispatch = null;
     }
 
     // --------------------------------------------------------------------------
@@ -279,8 +278,8 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
 
     public async dispatch<T>(value: ITransportEvent<T>): Promise<void> {
         ValidateUtil.validate(value);
+        this.events.push(value);
         this.transport.dispatch(value);
-        this.eventsToDispatch.push(value);
     }
 
     public async destroyAsync(): Promise<void> {

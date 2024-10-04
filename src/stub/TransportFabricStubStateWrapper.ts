@@ -71,11 +71,11 @@ export class TransportFabricStubStateProxy extends TransportFabricStub {
     }
 
     public async putStateRaw(key: string, item: string): Promise<void> {
-        this.state.putState(key, item);
+        return this.state.putState(key, item);
     }
 
     public async removeState(key: string): Promise<void> {
-        this.state.removeState(key);
+        return this.state.removeState(key);
     }
 
     public async destroyAsync(): Promise<void> {
