@@ -16,13 +16,13 @@
     },
     "license": "ISC",
     "dependencies": {
-        "@hlf-core/common": "~3.1.5",
+        "@hlf-core/common": "~3.1.7",
         "@hlf-core/transport-common": "~3.0.15",
         "fabric-shim": "2.5.1",
         "reflect-metadata": "~0.1.13"
     },
     "devDependencies": {
-        "gulp-npm-module-publisher": "~3.0.0"
+        "gulp-npm-module-publisher": "~3.0.4"
     },
     "repository": {
         "type": "git",

@@ -166,5 +166,4 @@ export interface ITransportFabricSettingsBatch extends IChaincodeBatchSettings {
     timeout: number;
     algorithm: string;
     publicKey: string;
-    privateKey: string;
 }

@@ -33,7 +33,7 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
     // --------------------------------------------------------------------------
 
     public static createNonceKey(userId: string): string {
-        return `→nonce~${userId}`;
+        return `→${userId}~nonce`;
     }
 
     // --------------------------------------------------------------------------

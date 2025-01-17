@@ -12,6 +12,9 @@ export * from './database/entity/EntityRelationChild';
 export * from './database/manager/CoinManager';
 export * from './database/manager/CoinAccountManager';
 //
+export * from './seed/Seeder';
+export * from './seed/SeededChaincode';
+//
 export * from './state/StateProxy';
 //
 export * from './guard/roles';
