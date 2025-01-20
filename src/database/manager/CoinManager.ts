@@ -1,6 +1,6 @@
 import { UID, TransformUtil, ILogger, IPaginableBookmark, IPaginationBookmark } from '@ts-core/common';
 import { CoinAccountManager } from './CoinAccountManager';
-import { Coin, CoinBalance, CoinAccount } from '@hlf-core/common';
+import { Coin, CoinBalance, CoinAccount } from '@hlf-core/coin';
 import { EntityManagerImpl } from '../entity';
 import { IStub } from '../../stub';
 import * as _ from 'lodash';

@@ -1,4 +1,4 @@
-export * from './ErrorCode';
+export * from './Error';
 //
 export * from './TransportFabricChaincode';
 export * from './TransportFabricChaincodeReceiver';
@@ -29,3 +29,5 @@ export * from './stub/IStubHolder';
 export * from './stub/TransportFabricStub';
 export * from './stub/ITransportFabricStubHolder';
 export * from './stub/TransportFabricStubStateWrapper';
+// 
+export * from './service/CoinService';

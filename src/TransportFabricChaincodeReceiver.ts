@@ -21,7 +21,7 @@ import { isNumberString } from 'class-validator';
 import { IStub, TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { SignatureInvalidError } from './ErrorCode';
+import { SignatureInvalidError } from './Error';
 import { ChaincodeStub } from 'fabric-shim';
 import * as _ from 'lodash';
 

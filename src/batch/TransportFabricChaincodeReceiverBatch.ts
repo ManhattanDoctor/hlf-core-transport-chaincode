@@ -4,11 +4,10 @@ import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
 import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
 import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
-import { BatchInvalidError } from '../ErrorCode';
+import { BatchInvalidError, NoCommandsToBatchError } from '../Error';
 import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
 import { IKeyValue, IStub } from '../stub';
 import { DatabaseManager } from '../database';
-import { NoCommandsToBatchError } from '../ErrorCode';
 import * as _ from 'lodash';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {

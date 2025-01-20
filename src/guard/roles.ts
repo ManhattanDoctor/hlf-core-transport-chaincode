@@ -1,5 +1,5 @@
 import { IUserStubHolder } from '../stub';
-import { UserRoleForbiddenError } from '../ErrorCode';
+import { UserRoleForbiddenError } from '../Error';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { ILogger } from '@ts-core/common';
-import { CoinAccount } from '@hlf-core/common';
+import { CoinAccount } from '@hlf-core/coin';
 import { EntityManagerImpl } from '../entity';
 import { IStub } from '../../stub';
 
