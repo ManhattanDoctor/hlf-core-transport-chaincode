@@ -9,8 +9,9 @@ export * from './database/entity/EntityManager';
 export * from './database/entity/EntityManagerImpl';
 export * from './database/entity/EntityRelation';
 export * from './database/entity/EntityRelationChild';
-export * from './database/manager/CoinManager';
-export * from './database/manager/CoinAccountManager';
+export * from './database/manager/coin/CoinManager';
+export * from './database/manager/coin/ICoinManager';
+export * from './database/manager/coin/CoinAccountManager';
 //
 export * from './seed/Seeder';
 export * from './seed/SeededChaincode';

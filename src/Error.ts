@@ -1,18 +1,12 @@
-import { UID, getUid } from '@ts-core/common';
-import { Error as ErrorBase } from '@hlf-core/common';
+import { ExtendedError, UID, getUid } from '@ts-core/common';
 import * as _ from 'lodash';
 
-export class Error<D = any> extends ErrorBase<ErrorCode> {
-    // --------------------------------------------------------------------------
-    //
-    //  Constructor
-    //
-    // --------------------------------------------------------------------------
-
-    constructor(code: ErrorCode, message: string = '', details?: D) {
-        super(code, message, details);
+class Error<C, D = any> extends ExtendedError<D, C | ErrorCode> {
+    constructor(code: C | ErrorCode, message: string = '', details?: D) {
+        super(message, code, details);
     }
 }
+
 // Transport
 export class SignatureInvalidError extends Error<void> {
     constructor(message: string, details?: any) {
