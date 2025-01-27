@@ -1,11 +1,11 @@
 import { ILogger, LoggerWrapper, ObjectUtil } from '@ts-core/common';
 import { CoinBalance, ICoinEmitDto, CoinTransferredEvent, CoinEmittedEvent, CoinBurnedEvent, ICoinHoldDto, CoinHoldedEvent, CoinUnholdedEvent, ICoinTransferDto, ICoinBalanceGetDto, ICoinBalance, ICoin } from '@hlf-core/coin';
-import { IStub, IUserStubHolder } from '../stub';
+import { IStub, IStubHolder } from '../stub';
 import { CoinNotFoundError, CoinObjectNotFoundError } from '../Error';
 import { CoinManager, ICoinManager } from '../database/manager/coin';
 import * as _ from 'lodash';
 
-export class CoinService<T extends ICoin> extends LoggerWrapper {
+export class CoinService<H extends IStubHolder = IStubHolder> extends LoggerWrapper {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -47,7 +47,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async emit(holder: IUserStubHolder, params: ICoinEmitDto): Promise<void> {
+    public async emit(holder: H, params: ICoinEmitDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -58,7 +58,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
         await holder.stub.dispatch(new CoinEmittedEvent(params));
     }
 
-    public async emitHeld(holder: IUserStubHolder, params: ICoinEmitDto): Promise<void> {
+    public async emitHeld(holder: H, params: ICoinEmitDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -69,7 +69,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
         await holder.stub.dispatch(new CoinEmittedEvent(params));
     }
 
-    public async burn(holder: IUserStubHolder, params: ICoinEmitDto): Promise<void> {
+    public async burn(holder: H, params: ICoinEmitDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -80,7 +80,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
         await holder.stub.dispatch(new CoinBurnedEvent(params));
     }
 
-    public async burnHeld(holder: IUserStubHolder, params: ICoinEmitDto): Promise<void> {
+    public async burnHeld(holder: H, params: ICoinEmitDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -97,7 +97,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async hold(holder: IUserStubHolder, params: ICoinHoldDto): Promise<void> {
+    public async hold(holder: H, params: ICoinHoldDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -108,7 +108,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
         await holder.stub.dispatch(new CoinHoldedEvent({ coinUid: params.coinUid, amount: params.amount, objectUid: params.from }));
     }
 
-    public async unhold(holder: IUserStubHolder, params: ICoinHoldDto): Promise<void> {
+    public async unhold(holder: H, params: ICoinHoldDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
@@ -125,15 +125,18 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async transfer(holder: IUserStubHolder, params: ICoinTransferDto): Promise<void> {
-        if (await holder.stub.hasNotState(params.to)) {
-            throw new CoinObjectNotFoundError(params.to);
-        }
+    public async transfer(holder: H, params: ICoinTransferDto): Promise<void> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
-        await this.getManager(holder.stub, params.coinUid).transfer(params.coinUid, holder.user.uid, params.to, params.amount);
-        await holder.stub.dispatch(new CoinTransferredEvent({ coinUid: params.coinUid, from: holder.user.uid, to: params.to, amount: params.amount }));
+        if (await holder.stub.hasNotState(params.to)) {
+            throw new CoinObjectNotFoundError(params.to);
+        }
+        if (await holder.stub.hasNotState(params.from)) {
+            throw new CoinObjectNotFoundError(params.from);
+        }
+        await this.getManager(holder.stub, params.coinUid).transfer(params.coinUid, params.from, params.to, params.amount);
+        await holder.stub.dispatch(new CoinTransferredEvent({ coinUid: params.coinUid, from: params.from, to: params.to, amount: params.amount }));
     }
 
     // --------------------------------------------------------------------------
@@ -142,14 +145,13 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async balanceGet(holder: IUserStubHolder, params: ICoinBalanceGetDto): Promise<ICoinBalance> {
-        if (await holder.stub.hasNotState(params.objectUid)) {
-            throw new CoinObjectNotFoundError(params.objectUid);
-        }
+    public async balanceGet(holder: H, params: ICoinBalanceGetDto): Promise<ICoinBalance> {
         if (await holder.stub.hasNotState(params.coinUid)) {
             throw new CoinNotFoundError(params.coinUid);
         }
-
+        if (await holder.stub.hasNotState(params.objectUid)) {
+            throw new CoinObjectNotFoundError(params.objectUid);
+        }
         let account = await this.getManager(holder.stub, params.coinUid).accountGet(params.coinUid, params.objectUid);
         let item = new CoinBalance();
         ObjectUtil.copyPartial(account, item, ['held', 'inUse']);
@@ -162,7 +164,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    protected getManager(stub: IStub, coinUid: string): ICoinManager<T> {
+    protected getManager<T extends ICoin>(stub: IStub, coinUid: string): ICoinManager<T> {
         return new CoinManager<T>(this.logger, stub);
     }
 }

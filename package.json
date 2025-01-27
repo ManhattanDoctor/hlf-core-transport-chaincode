@@ -16,7 +16,7 @@
     },
     "license": "ISC",
     "dependencies": {
-        "@hlf-core/coin": "~3.2.9",
+        "@hlf-core/coin": "~3.2.10",
         "@hlf-core/common": "~3.2.3",
         "@hlf-core/transport-common": "~3.0.15",
         "fabric-shim": "2.5.1",
