@@ -2,9 +2,10 @@
 import { LoggerWrapper, ILogger } from '@ts-core/common';
 import { TransportFabricChaincodeReceiver } from '../TransportFabricChaincodeReceiver';
 import { ChaincodeStub } from 'fabric-shim';
-import { IStub, IUserStubHolder, TransportFabricStub } from '../stub';
+import { IStub, IStubHolder } from '@hlf-core/chaincode';
+import { TransportFabricStub } from '../stub';
 
-export abstract class Seeder<S = any, H extends IUserStubHolder = IUserStubHolder> extends LoggerWrapper {
+export abstract class Seeder<S = any, H extends IStubHolder = IStubHolder> extends LoggerWrapper {
     // --------------------------------------------------------------------------
     //
     //  Static Properties

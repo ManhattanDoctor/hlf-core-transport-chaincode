@@ -1,9 +1,10 @@
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { ILogger, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub } from 'fabric-shim';
-import { IKeyValue, StateQueryIterator, TransportFabricStub } from '../stub';
+import { StateQueryIterator, TransportFabricStub } from '../stub';
 import { GetStateRaw, StateProxy } from '../state';
 import * as _ from 'lodash';
+import { IKeyValue } from '@hlf-core/chaincode';
 
 export class TransportFabricStubStateProxy extends TransportFabricStub {
     // --------------------------------------------------------------------------

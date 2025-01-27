@@ -1,6 +1,6 @@
 import { ExtendedError, ITransportCommand, ITransportCommandAsync, Transport } from '@ts-core/common';
 import { ITransportFabricRequestPayload } from '@hlf-core/transport-common';
-import { IStub, IStubHolder } from './stub';
+import { IStub, IStubHolder } from '@hlf-core/chaincode';
 import * as _ from 'lodash';
 
 export class TransportFabricChaincodeCommandWrapper<U = any, V = any> implements ITransportCommandAsync<U, V>, IStubHolder {

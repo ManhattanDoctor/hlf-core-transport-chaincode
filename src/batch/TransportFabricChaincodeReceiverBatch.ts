@@ -6,8 +6,7 @@ import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, 
 import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
 import { BatchInvalidError, NoCommandsToBatchError } from '../Error';
 import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
-import { IKeyValue, IStub } from '../stub';
-import { DatabaseManager } from '../database';
+import { DatabaseManager, IKeyValue, IStub } from '@hlf-core/chaincode';
 import * as _ from 'lodash';
 
 export class TransportFabricChaincodeReceiverBatch extends TransportFabricChaincodeReceiver<ITransportFabricChaincodeSettingsBatch> {

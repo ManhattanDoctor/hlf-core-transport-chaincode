@@ -1,5 +1,5 @@
+import { IStubHolder } from '@hlf-core/chaincode';
 import { ExtendedError } from '@ts-core/common';
-import { IStubHolder } from './IStubHolder';
 import * as _ from 'lodash';
 import 'reflect-metadata';
 
