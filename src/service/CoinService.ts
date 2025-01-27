@@ -161,6 +161,6 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     protected getManager(stub: IStub, coinUid: string): ICoinManager<T> {
-        return new CoinManager(this.logger, stub);
+        return new CoinManager<T>(this.logger, stub);
     }
 }
