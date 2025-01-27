@@ -1,7 +1,7 @@
-import { UID, ILogger, LoggerWrapper, ObjectUtil } from '@ts-core/common';
-import { CoinBalance, CoinUtil, ICoinEmitDto, CoinTransferredEvent, CoinEmittedEvent, CoinBurnedEvent, ICoinHoldDto, CoinHoldedEvent, CoinUnholdedEvent, ICoinTransferDto, ICoinBalanceGetDto, ICoinBalance, ICoin } from '@hlf-core/coin';
+import { ILogger, LoggerWrapper, ObjectUtil } from '@ts-core/common';
+import { CoinBalance, ICoinEmitDto, CoinTransferredEvent, CoinEmittedEvent, CoinBurnedEvent, ICoinHoldDto, CoinHoldedEvent, CoinUnholdedEvent, ICoinTransferDto, ICoinBalanceGetDto, ICoinBalance, ICoin } from '@hlf-core/coin';
 import { IStub, IUserStubHolder } from '../stub';
-import { CoinAlreadyExistsError, CoinNotFoundError, CoinObjectNotFoundError } from '../Error';
+import { CoinNotFoundError, CoinObjectNotFoundError } from '../Error';
 import { CoinManager, ICoinManager } from '../database/manager/coin';
 import * as _ from 'lodash';
 
@@ -22,6 +22,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
+    /*
     public async add(holder: IUserStubHolder, coinId: string, decimals: number, owner: UID, emit?: Partial<ICoinEmitDto>): Promise<T> {
         let uid = CoinUtil.createUid(coinId, decimals, owner);
         if (await holder.stub.hasState(uid)) {
@@ -38,6 +39,7 @@ export class CoinService<T extends ICoin> extends LoggerWrapper {
         }
         return item;
     }
+    */
 
     // --------------------------------------------------------------------------
     //
