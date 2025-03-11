@@ -21,7 +21,7 @@ import { isNumberString } from 'class-validator';
 import { TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { CommandSignatureAlgorithmInvalidError, CommandSignatureAlgorithmUnknownError, CommandSignatureInvalidError, CommandSignatureNonceLessThanPreviousError, CommandSignatureNonceNotFoundError, CommandSignatureNonceNotNumericStringError, CommandSignatureNotFoundError, CommandSignaturePublicKeyInvalidError } from './Error';
+import { CommandSignatureAlgorithmNotFoundError, CommandSignatureAlgorithmUnknownError, CommandSignatureInvalidError, CommandSignatureNonceLessThanPreviousError, CommandSignatureNonceNotFoundError, CommandSignatureNonceNotNumericStringError, CommandSignatureNotFoundError, CommandSignaturePublicKeyNotFoundError } from './Error';
 import { ChaincodeStub } from 'fabric-shim';
 import { IStub } from '@hlf-core/chaincode';
 import * as _ from 'lodash';
@@ -139,10 +139,10 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
             throw new CommandSignatureNotFoundError();
         }
         if (_.isNil(signature.algorithm)) {
-            throw new CommandSignatureAlgorithmInvalidError();
+            throw new CommandSignatureAlgorithmNotFoundError();
         }
         if (_.isNil(signature.publicKey)) {
-            throw new CommandSignaturePublicKeyInvalidError();
+            throw new CommandSignaturePublicKeyNotFoundError();
         }
 
         await this.validateNonce(stub, command, payload);

@@ -50,14 +50,14 @@ export class CommandSignatureInvalidError extends Error<void> {
         super(ErrorCode.COMMAND_SIGNATURE_INVALID)
     }
 }
-export class CommandSignatureAlgorithmInvalidError extends Error<void> {
+export class CommandSignatureAlgorithmNotFoundError extends Error<void> {
     constructor() {
-        super(ErrorCode.COMMAND_SIGNATURE_ALGORITHM_INVALID)
+        super(ErrorCode.COMMAND_SIGNATURE_ALGORITHM_NOT_FOUND)
     }
 }
-export class CommandSignaturePublicKeyInvalidError extends Error<void> {
+export class CommandSignaturePublicKeyNotFoundError extends Error<void> {
     constructor() {
-        super(ErrorCode.COMMAND_SIGNATURE_PUBLIC_KEY_INVALID)
+        super(ErrorCode.COMMAND_SIGNATURE_PUBLIC_KEY_NOT_FOUND)
     }
 }
 export class CommandSignatureAlgorithmUnknownError extends Error<string> {
@@ -88,11 +88,6 @@ export class CommandBatchNoCommandsToBatchError extends Error<void> {
     }
 }
 
-export interface IUserRoleForbiddenErrorDetails {
-    has: Array<string>;
-    required: Array<string>;
-}
-
 export interface IInvalidValue<T = any> {
     name?: string;
     value: T | Array<T>;
@@ -107,10 +102,10 @@ export enum ErrorCode {
 
     COMMAND_SIGNATURE_INVALID = 'HLF_COMMAND_SIGNATURE_INVALID',
     COMMAND_SIGNATURE_NOT_FOUND = 'HLF_COMMAND_SIGNATURE_NOT_FOUND',
-    COMMAND_SIGNATURE_ALGORITHM_INVALID = 'HLF_COMMAND_SIGNATURE_ALGORITHM_INVALID',
+    COMMAND_SIGNATURE_ALGORITHM_NOT_FOUND= 'HLF_COMMAND_SIGNATURE_ALGORITHM_NOT_FOUND',
     COMMAND_SIGNATURE_ALGORITHM_UNKNOWN = 'HLF_COMMAND_SIGNATURE_ALGORITHM_UNKNOWN',
-
-    COMMAND_SIGNATURE_PUBLIC_KEY_INVALID = 'HLF_COMMAND_SIGNATURE_PUBLIC_KEY_INVALID',
+    COMMAND_SIGNATURE_PUBLIC_KEY_NOT_FOUND = 'HLF_COMMAND_SIGNATURE_PUBLIC_KEY_NOT_FOUND',
+    
     COMMAND_SIGNATURE_NONCE_NOT_FOUND = 'HLF_COMMAND_SIGNATURE_NONCE_NOT_FOUND',
     COMMAND_SIGNATURE_NONCE_LESS_THAN_PREVIOUS = 'HLF_COMMAND_SIGNATURE_NONCE_LESS_THAN_PREVIOUS',
     COMMAND_SIGNATURE_NONCE_NOT_NUMERIC_STRING = 'HLF_COMMAND_SIGNATURE_NONCE_NOT_NUMERIC_STRING',
