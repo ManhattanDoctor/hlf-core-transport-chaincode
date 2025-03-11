@@ -102,8 +102,6 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
 
     protected setEvent(item: ITransportFabricEvents): void {
         item = ObjectUtil.sortKeys(item, true);
-        console.log('Set events');
-        console.log(item);
         this.stub.setEvent(TRANSPORT_CHAINCODE_EVENT, Buffer.from(JSON.stringify(item), TransformUtil.ENCODING));
     }
 

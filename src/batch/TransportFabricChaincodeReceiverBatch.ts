@@ -4,7 +4,7 @@ import { ITransportFabricBatchDto } from './ITransportFabricBatchDto';
 import { TransportFabricStubBatch } from './TransportFabricStubBatch';
 import { DateUtil, ITransportCommand, ExtendedError, TransformUtil, ObjectUtil, TransportLogType } from '@ts-core/common';
 import { IChaincodeBatchSettings, ITransportFabricRequestPayload, TransportFabricRequestPayload, TransportFabricResponsePayload, TRANSPORT_FABRIC_COMMAND_BATCH_NAME } from '@hlf-core/transport-common';
-import { BatchInvalidError, NoCommandsToBatchError } from '../Error';
+import { CommandBatchNoCommandsToBatchError, CommandBatchSignatureAlgorithmInvalidError, CommandBatchSignaturePublicKeyInvalidError, CommandBatchTimeoutNotExceedError } from '../Error';
 import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatchEventWrapper';
 import { DatabaseManager, IKeyValue, IStub } from '@hlf-core/chaincode';
 import * as _ from 'lodash';
@@ -54,7 +54,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     protected async batch<U>(stubOriginal: ChaincodeStub, stub: IStub, payload: TransportFabricRequestPayload<U>): Promise<ITransportFabricBatchDto> {
         let kvs = await DatabaseManager.getKV(stub, TransportFabricChaincodeReceiverBatch.PREFIX);
         if (_.isEmpty(kvs)) {
-            throw new NoCommandsToBatchError();
+            throw new CommandBatchNoCommandsToBatchError();
         }
 
         console.log('Called batch', kvs);
@@ -97,10 +97,10 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
     protected async batchValidate<U>(payload: TransportFabricRequestPayload<U>, stub: IStub): Promise<void> {
         // Signature was checked before
         if (payload.options.signature.algorithm !== this.settings.batch.algorithm) {
-            throw new BatchInvalidError(`Batch command has invalid algorithm`);
+            throw new CommandBatchSignatureAlgorithmInvalidError({ value: payload.options.signature.algorithm, expected: this.settings.batch.algorithm });
         }
         if (payload.options.signature.publicKey !== this.settings.batch.publicKey) {
-            throw new BatchInvalidError(`Batch command has invalid publicKey`);
+            throw new CommandBatchSignaturePublicKeyInvalidError({ value: payload.options.signature.publicKey, expected: this.settings.batch.publicKey });
         }
 
         if (!_.isNumber(this.settings.batch.timeout)) {
@@ -108,7 +108,7 @@ export class TransportFabricChaincodeReceiverBatch extends TransportFabricChainc
         }
         let time = stub.transaction.date.getTime();
         if (_.isNumber(this.batchLastTime) && time - this.batchLastTime < this.settings.batch.timeout) {
-            throw new BatchInvalidError(`Batch command timeout is not exceeded`);
+            throw new CommandBatchTimeoutNotExceedError();
         }
         this.batchLastTime = time;
     }

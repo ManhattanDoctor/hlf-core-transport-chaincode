@@ -21,10 +21,10 @@ import { isNumberString } from 'class-validator';
 import { TransportFabricStub } from './stub';
 import { TransportFabricChaincodeCommandWrapper } from './TransportFabricChaincodeCommandWrapper';
 import { ITransportFabricRequestPayload, ITransportFabricResponsePayload, TransportFabricRequestPayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
-import { SignatureInvalidError } from './Error';
+import { CommandSignatureAlgorithmInvalidError, CommandSignatureAlgorithmUnknownError, CommandSignatureInvalidError, CommandSignatureNonceLessThanPreviousError, CommandSignatureNonceNotFoundError, CommandSignatureNonceNotNumericStringError, CommandSignatureNotFoundError, CommandSignaturePublicKeyInvalidError } from './Error';
 import { ChaincodeStub } from 'fabric-shim';
-import * as _ from 'lodash';
 import { IStub } from '@hlf-core/chaincode';
+import * as _ from 'lodash';
 
 export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincodeSettings = ITransportFabricChaincodeSettings> extends TransportImpl<T, ITransportCommandOptions, ITransportFabricCommandRequest> {
     // --------------------------------------------------------------------------
@@ -134,42 +134,43 @@ export class TransportFabricChaincodeReceiver<T extends ITransportFabricChaincod
 
     protected async validateSignature<U>(stub: IStub, command: ITransportCommand<U>, payload: ITransportFabricRequestPayload<U>): Promise<void> {
         let signature = payload.options.signature;
+        let { name } = command;
         if (_.isNil(signature)) {
-            throw new SignatureInvalidError(`Command "${command.name}" has nil signature`);
+            throw new CommandSignatureNotFoundError();
         }
         if (_.isNil(signature.algorithm)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid algorithm`);
+            throw new CommandSignatureAlgorithmInvalidError();
         }
         if (_.isNil(signature.publicKey)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid publicKey`);
+            throw new CommandSignaturePublicKeyInvalidError();
         }
 
         await this.validateNonce(stub, command, payload);
 
         let manager = _.find(this.settings.cryptoManagers, { algorithm: signature.algorithm });
         if (_.isNil(manager)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature algorithm (${signature.algorithm}) doesn't support`);
+            throw new CommandSignatureAlgorithmUnknownError(signature.algorithm);
         }
 
         let isVerified = await TransportCryptoManager.verify(command, manager, signature);
         if (!isVerified) {
-            throw new SignatureInvalidError(`Command "${command.name}" has invalid signature`);
+            throw new CommandSignatureInvalidError();
         }
     }
 
     protected async validateNonce<U>(stub: IStub, command: ITransportCommand<U>, payload: ITransportFabricRequestPayload<U>): Promise<void> {
         let signature = payload.options.signature;
         if (_.isNil(signature.nonce)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature has invalid nonce`);
+            throw new CommandSignatureNonceNotFoundError();
         }
         if (!isNumberString(signature.nonce)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be numeric string`);
+            throw new CommandSignatureNonceNotNumericStringError(signature.nonce);
         }
 
         let key = TransportFabricChaincodeReceiver.createNonceKey(stub.user.id);
         let item = await stub.getStateRaw(key);
         if (!_.isNil(item) && !MathUtil.greaterThan(signature.nonce, item)) {
-            throw new SignatureInvalidError(`Command "${command.name}" signature nonce must be granter than ${item}`);
+            throw new CommandSignatureNonceLessThanPreviousError(signature.nonce);
         }
         if (!payload.isReadonly) {
             await stub.putStateRaw(key, signature.nonce);
