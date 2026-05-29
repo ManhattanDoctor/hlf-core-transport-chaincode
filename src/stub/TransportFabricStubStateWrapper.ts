@@ -3,8 +3,8 @@ import { ILogger, ITransportReceiver } from '@ts-core/common';
 import { ChaincodeStub } from 'fabric-shim';
 import { StateQueryIterator, TransportFabricStub } from '../stub';
 import { GetStateRaw, StateProxy } from '../state';
-import * as _ from 'lodash';
 import { IKeyValue } from '@hlf-core/chaincode';
+import * as _ from 'lodash';
 
 export class TransportFabricStubStateProxy extends TransportFabricStub {
     // --------------------------------------------------------------------------

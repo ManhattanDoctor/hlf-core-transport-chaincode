@@ -5,8 +5,8 @@ import { TransportFabricStubBatchEventWrapper } from './TransportFabricStubBatch
 import { TransportFabricStub } from '../stub';
 import { StateProxy } from '../state';
 import { Iterators, StateQueryResponse } from 'fabric-shim';
-import * as _ from 'lodash';
 import { IKeyValue } from '@hlf-core/chaincode';
+import * as _ from 'lodash';
 
 export class TransportFabricStubBatch<U = any> extends TransportFabricStub {
     // --------------------------------------------------------------------------
