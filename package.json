@@ -27,6 +27,14 @@
         "url": "git+https://github.com/ManhattanDoctor/hlf-core-transport-chaincode"
     },
     "keywords": [
+        "hyperledger",
+        "hyperledger-fabric",
+        "fabric",
+        "chaincode",
+        "transport",
+        "smart-contracts",
+        "blockchain",
+        "distributed-ledger",
         "typescript"
     ],
     "bugs": {
