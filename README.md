@@ -1,9 +1,9 @@
 # @hlf-core/transport-chaincode
 
+> TypeScript библиотека транспорта на стороне chaincode: приём команд, проверка подписи, пакетная обработка
+
 [![npm version](https://img.shields.io/npm/v/@hlf-core/transport-chaincode.svg)](https://www.npmjs.com/package/@hlf-core/transport-chaincode)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-
-> [English](./README.md) | **Русский**
 
 Комплексный TypeScript фреймворк для создания безопасного и масштабируемого **chaincode для Hyperledger Fabric** с расширенными возможностями транспортного уровня, криптографической валидацией подписей, пакетной обработкой и событийно-ориентированной архитектурой.
 
@@ -761,7 +761,7 @@ make clean
 
 ## Лицензия
 
-ISC License - см. файл LICENSE для деталей
+ISC
 
 ## Автор
 
@@ -769,11 +769,13 @@ ISC License - см. файл LICENSE для деталей
 - Email: renat.gubaev@gmail.com
 - GitHub: [@ManhattanDoctor](https://github.com/ManhattanDoctor)
 
+## Ссылки
+
+- [GitHub Repository](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode)
+- [NPM Package](https://www.npmjs.com/package/@hlf-core/transport-chaincode)
+- [Issue Tracker](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues)
+- [Hyperledger Fabric Documentation](https://hyperledger-fabric.readthedocs.io/)
+
 ## Поддержка
 
-- [Вопросы и проблемы](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues)
-- [Обсуждения](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/discussions)
-
----
-
-**Создано с ❤️ для сообщества Hyperledger Fabric**
+Если вы нашли баг или у вас есть предложение по улучшению, пожалуйста, создайте issue в [GitHub Issues](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues).
