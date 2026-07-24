@@ -21,6 +21,9 @@ export class TransportFabricStub extends LoggerWrapper implements IStub {
         for (let i = 0; i < events.length; i++) {
             let event = TransformUtil.fromClass(events[i]);
             event.uid = TweetNaCl.hash(`${transaction}_${i}`);
+            if (!_.isNil(event.traceId)) {
+                event.traceId = TweetNaCl.hash(transaction);
+            }
             items.push(event);
         }
         return item;
