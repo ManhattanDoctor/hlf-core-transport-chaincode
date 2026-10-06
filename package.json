@@ -1,6 +1,6 @@
 {
     "name": "@hlf-core/transport-chaincode",
-    "version": "3.6.9",
+    "version": "3.6.10",
     "description": "TypeScript library for Hyperledger Fabric transport on the chaincode side: command receiving, signature and nonce validation, batch processing and event dispatching",
     "main": "./cjs/public-api.js",
     "module": "./esm/public-api.js",
