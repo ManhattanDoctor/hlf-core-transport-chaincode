@@ -1,4 +1,4 @@
-import { ITransportFabricResponsePayload } from '@hlf-core/transport-common';
+import { ITransportFabricResponsePayload, TransportFabricResponsePayload } from '@hlf-core/transport-common';
 import { ExtendedError, ObservableData, TransformUtil, ILogger, LoggerWrapper, LoggerLevel } from '@ts-core/common';
 import { Shim, ChaincodeInterface, ChaincodeResponse, ChaincodeStub } from 'fabric-shim';
 import { TransportFabricChaincodeReceiver } from './TransportFabricChaincodeReceiver';
@@ -54,7 +54,14 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
         this.observer.next(new ObservableData(TransportFabricChaincodeEvent.INVOKE_FINISHED, event));
 
         // fabric-shim bug, according to the interface shim expects buffer on error, but in fact works with string
-        let content = this.getContent(response, isError);
+        let content: Buffer = null;
+        try {
+            content = this.getContent(response, isError);
+        } catch (error) {
+            this.error(`Unable to serialize response of "${response?.id}": ${error.message}`);
+            isError = true;
+            content = this.getContent(this.getContentErrorPayload(response, error), isError);
+        }
         return isError ? Shim.error(content) : Shim.success(content);
     }
 
@@ -69,6 +76,11 @@ export abstract class TransportFabricChaincode<T> extends LoggerWrapper implemen
             return (!_.isNil(response) ? TransformUtil.fromClassString(response) : '') as any;
         }
         return !_.isNil(response) ? TransformUtil.fromClassBuffer(response) : Buffer.from('');
+    }
+
+    protected getContentErrorPayload<V>(response: ITransportFabricResponsePayload<V>, error: Error): ITransportFabricResponsePayload {
+        let item: ExtendedError = ExtendedError.instanceOf(response?.response) ? (response.response as ExtendedError) : ExtendedError.create(error);
+        return TransportFabricResponsePayload.fromError(response?.id, new ExtendedError(item.message, item.code));
     }
 
     // --------------------------------------------------------------------------
