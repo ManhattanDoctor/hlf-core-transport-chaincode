@@ -1,91 +1,96 @@
+**English** · [Русский](./README.ru.md)
+
 # @hlf-core/transport-chaincode
 
-> TypeScript библиотека транспорта на стороне chaincode: приём команд, проверка подписи, пакетная обработка
+> TypeScript transport library on the chaincode side: command reception, signature verification, batch processing
 
 [![npm version](https://img.shields.io/npm/v/@hlf-core/transport-chaincode.svg)](https://www.npmjs.com/package/@hlf-core/transport-chaincode)
+[![Docs](https://img.shields.io/badge/docs-hlf.gnosisai.ru-1f6feb)](https://hlf.gnosisai.ru/docs/packages/transport-chaincode)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-Комплексный TypeScript фреймворк для создания безопасного и масштабируемого **chaincode для Hyperledger Fabric** с расширенными возможностями транспортного уровня, криптографической валидацией подписей, пакетной обработкой и событийно-ориентированной архитектурой.
+Full documentation: https://hlf.gnosisai.ru/docs/packages/transport-chaincode
 
-## Содержание
+A comprehensive TypeScript framework for building secure and scalable **chaincode for Hyperledger Fabric** with advanced transport-layer capabilities, cryptographic signature validation, batch processing, and an event-driven architecture.
 
-- [Обзор](#обзор)
-- [Возможности](#возможности)
-- [Установка](#установка)
-- [Быстрый старт](#быстрый-старт)
-- [Основные концепции](#основные-концепции)
-- [Архитектура](#архитектура)
-- [Справочник API](#справочник-api)
-- [Продвинутое использование](#продвинутое-использование)
-- [Безопасность](#безопасность)
-- [Примеры](#примеры)
-- [Участие в разработке](#участие-в-разработке)
-- [Лицензия](#лицензия)
+## Table of Contents
 
-## Обзор
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Core Concepts](#core-concepts)
+- [Architecture](#architecture)
+- [API Reference](#api-reference)
+- [Advanced Usage](#advanced-usage)
+- [Security](#security)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
 
-`@hlf-core/transport-chaincode` является частью **экосистемы hlf-core** - коллекции взаимосвязанных библиотек, разработанных для упрощения разработки на Hyperledger Fabric. Эта библиотека предоставляет надежную абстракцию транспортного уровня для chaincode, обрабатывая команды, валидацию подписей, управление состоянием и пакетные операции.
+## Overview
 
-### Ключевые преимущества
+`@hlf-core/transport-chaincode` is part of the **hlf-core ecosystem** - a collection of interconnected libraries designed to simplify development on Hyperledger Fabric. This library provides a robust transport-layer abstraction for chaincode, handling commands, signature validation, state management, and batch operations.
 
-- **Фокус на бизнес-логике**: Фреймворк берет на себя аутентификацию, валидацию и управление состоянием
-- **Типобезопасность**: Полная поддержка TypeScript с исчерпывающими определениями типов
-- **Безопасность по умолчанию**: Встроенная криптографическая валидация подписей и защита от replay-атак
-- **Оптимизация производительности**: Поддержка пакетной обработки для высоконагруженных сценариев
-- **Событийно-ориентированность**: Observable паттерн для жизненного цикла chaincode и событий команд
-- **Модульный дизайн**: Четкое разделение ответственности с расширяемой архитектурой
+### Key Benefits
 
-## Возможности
+- **Focus on business logic**: The framework takes care of authentication, validation, and state management
+- **Type safety**: Full TypeScript support with exhaustive type definitions
+- **Secure by default**: Built-in cryptographic signature validation and replay-attack protection
+- **Performance optimization**: Batch-processing support for high-load scenarios
+- **Event-driven**: Observable pattern for the chaincode lifecycle and command events
+- **Modular design**: Clear separation of concerns with an extensible architecture
 
-### 🔐 Безопасность и аутентификация
+## Features
 
-- **Криптографическая валидация подписей**: Проверка подписей команд с настраиваемыми алгоритмами
-- **Защита от replay-атак**: Механизм на основе nonce предотвращает повторные атаки
-- **Управление публичными ключами**: Гибкая система валидации публичных ключей
-- **Команды без подписей**: Опциональная поддержка команд, не требующих подписей
+### Security and Authentication
 
-### 📦 Обработка команд и событий
+- **Cryptographic signature validation**: Verification of command signatures with configurable algorithms
+- **Replay-attack protection**: A nonce-based mechanism prevents repeated attacks
+- **Public key management**: A flexible public key validation system
+- **Unsigned commands**: Optional support for commands that do not require signatures
 
-- **Асинхронная обработка команд**: Встроенная поддержка асинхронного выполнения команд
-- **Паттерн Command Wrapper**: Чистая абстракция над ChaincodeStub из fabric-shim
-- **Диспетчеризация событий**: Система событий на основе RxJS для жизненного цикла chaincode
-- **Абстракция транспорта**: Единый интерфейс для запросов и ответов команд
+### Command and Event Processing
 
-### 🗄️ Управление состоянием
+- **Asynchronous command processing**: Built-in support for asynchronous command execution
+- **Command Wrapper pattern**: A clean abstraction over ChaincodeStub from fabric-shim
+- **Event dispatching**: An RxJS-based event system for the chaincode lifecycle
+- **Transport abstraction**: A unified interface for command requests and responses
 
-- **Паттерн State Proxy**: Транзакционное управление состоянием с отложенной записью
-- **Автоматическая валидация**: Встроенная валидация с использованием декораторов class-validator
-- **Операции ключ-значение**: Упрощенные операции get/put/remove
-- **Поддержка пагинации**: Запрос больших наборов данных с закладками
+### State Management
 
-### ⚡ Производительность
+- **State Proxy pattern**: Transactional state management with deferred writes
+- **Automatic validation**: Built-in validation using class-validator decorators
+- **Key-value operations**: Simplified get/put/remove operations
+- **Pagination support**: Query large data sets with bookmarks
 
-- **Пакетная обработка**: Выполнение нескольких команд в одной транзакции
-- **Кеширование состояния**: Слой кеширования в памяти для операций с состоянием
-- **Оптимизированная сериализация**: Эффективная трансформация JSON с class-transformer
+### Performance
 
-### 🌱 Удобство разработки
+- **Batch processing**: Execute multiple commands in a single transaction
+- **State caching**: An in-memory caching layer for state operations
+- **Optimized serialization**: Efficient JSON transformation with class-transformer
 
-- **Поддержка seeding**: Инициализация состояния chaincode начальными данными
-- **Нативный TypeScript**: Написан на TypeScript с полной типобезопасностью
-- **Двойная поддержка модулей**: Включены сборки CommonJS и ESM
-- **Расширяемая архитектура**: Паттерны фабрик для кастомизации
+### Developer Experience
 
-## Установка
+- **Seeding support**: Initialize chaincode state with initial data
+- **Native TypeScript**: Written in TypeScript with full type safety
+- **Dual module support**: CommonJS and ESM builds are included
+- **Extensible architecture**: Factory patterns for customization
+
+## Installation
 
 ```bash
 npm install @hlf-core/transport-chaincode
 ```
 
-### Зависимости
+### Dependencies
 
 ```bash
 npm install @hlf-core/chaincode @hlf-core/transport-common @ts-core/common fabric-shim
 ```
 
-## Быстрый старт
+## Quick Start
 
-### Базовая реализация Chaincode
+### Basic Chaincode Implementation
 
 ```typescript
 import { ILogger } from '@ts-core/common';
@@ -95,13 +100,13 @@ import {
     TransportFabricChaincodeReceiver
 } from '@hlf-core/transport-chaincode';
 
-// Определите класс вашего chaincode
+// Define your chaincode class
 export class MyChaincode extends TransportFabricChaincode<void> {
     constructor(logger: ILogger) {
         const transport = new TransportFabricChaincodeReceiver({
             cryptoManagers: [{
                 algorithm: 'secp256k1',
-                publicKey: 'ваш-публичный-ключ'
+                publicKey: 'your-public-key'
             }],
             nonSignedCommands: ['healthCheck']
         });
@@ -114,44 +119,44 @@ export class MyChaincode extends TransportFabricChaincode<void> {
     }
 }
 
-// Запустите chaincode
+// Start the chaincode
 const chaincode = new MyChaincode(logger);
 const shim = require('fabric-shim');
 shim.start(chaincode);
 ```
 
-### Пример обработчика команды
+### Command Handler Example
 
 ```typescript
 import { ITransportCommand } from '@ts-core/common';
 import { TransportCommandAsync } from '@ts-core/common';
 
-// Определите команду
+// Define the command
 export class CreateUserCommand extends TransportCommandAsync<ICreateUserRequest, ICreateUserResponse> {
     constructor(request: ICreateUserRequest) {
         super('CreateUserCommand', request);
     }
 }
 
-// Обработайте команду в вашем обработчике
+// Handle the command in your handler
 export class CreateUserHandler {
     async execute(command: CreateUserCommand): Promise<ICreateUserResponse> {
         const stub = command.stub;
 
-        // Валидация запроса
+        // Validate the request
         ValidateUtil.validate(command.request);
 
-        // Доступ к аутентифицированному пользователю
+        // Access the authenticated user
         const userId = stub.user.id;
 
-        // Сохранение в состояние
+        // Save to state
         await stub.putState(`user_${userId}`, command.request, {
             isValidate: true,
             isTransform: true,
             isSortKeys: true
         });
 
-        // Отправка события
+        // Dispatch an event
         await stub.dispatch(new UserCreatedEvent({ userId }));
 
         return { success: true, userId };
@@ -159,147 +164,147 @@ export class CreateUserHandler {
 }
 ```
 
-## Основные концепции
+## Core Concepts
 
-### 1. Транспортный уровень
+### 1. Transport Layer
 
-Транспортный уровень обрабатывает коммуникацию между клиентами и chaincode, управляя:
-- Сериализацией/десериализацией команд
-- Валидацией подписей
-- Жизненным циклом запрос/ответ
-- Обработкой ошибок
+The transport layer handles communication between clients and chaincode, managing:
+- Command serialization/deserialization
+- Signature validation
+- The request/response lifecycle
+- Error handling
 
 ```typescript
 const transport = new TransportFabricChaincodeReceiver({
-    // Менеджеры криптографии для валидации подписей
+    // Crypto managers for signature validation
     cryptoManagers: [
         { algorithm: 'secp256k1', publicKey: 'key1' },
         { algorithm: 'ed25519', publicKey: 'key2' }
     ],
 
-    // Команды, не требующие подписей
+    // Commands that do not require signatures
     nonSignedCommands: ['getVersion', 'healthCheck'],
 
-    // Кастомная фабрика stub (опционально)
+    // Custom stub factory (optional)
     stubFactory: (logger, stub, payload, transport) =>
         new CustomStub(logger, stub, payload.id, payload.options, transport),
 
-    // Кастомная фабрика команд (опционально)
+    // Custom command factory (optional)
     commandFactory: (payload) =>
         new CustomCommand(payload.name, payload.request, payload.id)
 });
 ```
 
-### 2. События жизненного цикла Chaincode
+### 2. Chaincode Lifecycle Events
 
-Мониторинг выполнения chaincode с помощью RxJS observables:
+Monitor chaincode execution with RxJS observables:
 
 ```typescript
 chaincode.events.subscribe((event) => {
     switch (event.type) {
         case TransportFabricChaincodeEvent.INITED:
-            console.log('Chaincode инициализирован');
+            console.log('Chaincode initialized');
             break;
         case TransportFabricChaincodeEvent.INVOKE_STARTED:
-            console.log('Началось выполнение команды');
+            console.log('Command execution started');
             break;
         case TransportFabricChaincodeEvent.INVOKE_COMPLETE:
-            console.log('Команда успешно завершена');
+            console.log('Command completed successfully');
             break;
         case TransportFabricChaincodeEvent.INVOKE_ERROR:
-            console.error('Ошибка команды', event.data.response);
+            console.error('Command error', event.data.response);
             break;
         case TransportFabricChaincodeEvent.INVOKE_FINISHED:
-            console.log('Выполнение завершено');
+            console.log('Execution finished');
             break;
     }
 });
 ```
 
-### 3. Управление состоянием с StateProxy
+### 3. State Management with StateProxy
 
-StateProxy обеспечивает транзакционное поведение для операций с состоянием:
+StateProxy provides transactional behavior for state operations:
 
 ```typescript
 import { StateProxy } from '@hlf-core/transport-chaincode';
 
-// StateProxy группирует изменения состояния и фиксирует их атомарно
+// StateProxy groups state changes and commits them atomically
 const proxy = new StateProxy(logger, getStateRawFunction);
 
-// Операции кешируются в памяти
+// Operations are cached in memory
 await proxy.putState('key1', 'value1');
 await proxy.putState('key2', 'value2');
 await proxy.removeState('key3');
 
-// Операции чтения сначала проверяют кеш
-const value = await proxy.getState('key1'); // Возвращает из кеша
+// Read operations check the cache first
+const value = await proxy.getState('key1'); // Returns from the cache
 
-// Доступ к ожидающим операциям
-console.log(proxy.toPut);     // Map ожидающих записей
-console.log(proxy.toRemove);  // Array ожидающих удалений
+// Access pending operations
+console.log(proxy.toPut);     // Map of pending writes
+console.log(proxy.toRemove);  // Array of pending removals
 ```
 
-### 4. Пакетная обработка
+### 4. Batch Processing
 
-Выполнение нескольких команд в одной блокчейн-транзакции для повышения пропускной способности:
+Execute multiple commands in a single blockchain transaction to increase throughput:
 
 ```typescript
 import { TransportFabricChaincodeReceiverBatch } from '@hlf-core/transport-chaincode';
 
 const transport = new TransportFabricChaincodeReceiverBatch({
     batch: {
-        timeout: 5000,              // Мин. время между выполнением пакетов (мс)
-        algorithm: 'secp256k1',     // Требуемый алгоритм подписи
-        publicKey: 'batch-key'      // Требуемый публичный ключ для пакетных команд
+        timeout: 5000,              // Min. time between batch executions (ms)
+        algorithm: 'secp256k1',     // Required signature algorithm
+        publicKey: 'batch-key'      // Required public key for batch commands
     },
     cryptoManagers: [/* ... */]
 });
 
-// Команды автоматически группируются и выполняются вместе
-// при вызове пакетной команды
+// Commands are automatically grouped and executed together
+// when the batch command is invoked
 ```
 
-## Архитектура
+## Architecture
 
-### Диаграмма компонентов
+### Component Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    TransportFabricChaincode                 │
-│  - Реализует ChaincodeInterface (fabric-shim)               │
-│  - Управляет жизненным циклом (Init, Invoke)                │
-│  - Генерирует observable события                            │
+│  - Implements ChaincodeInterface (fabric-shim)              │
+│  - Manages lifecycle (Init, Invoke)                         │
+│  - Emits observable events                                  │
 └───────────────────────┬─────────────────────────────────────┘
                         │
                         ▼
 ┌─────────────────────────────────────────────────────────────┐
 │            TransportFabricChaincodeReceiver                 │
-│  - Парсит входящие запросы                                  │
-│  - Валидирует подписи                                       │
-│  - Управляет nonce (защита от replay)                       │
-│  - Диспетчеризует команды обработчикам                      │
+│  - Parses incoming requests                                 │
+│  - Validates signatures                                     │
+│  - Manages nonce (replay protection)                        │
+│  - Dispatches commands to handlers                          │
 └───────────────────────┬─────────────────────────────────────┘
                         │
         ┌───────────────┴───────────────┐
         ▼                               ▼
 ┌──────────────────┐          ┌──────────────────────┐
 │ TransportFabric  │          │   StateProxy         │
-│ Stub             │          │  - Кеширует операции │
-│  - Операции с    │◄─────────┤  - Отложенная запись │
-│    состоянием    │          │  - Атомарный commit  │
+│ Stub             │          │  - Caches operations │
+│  - State         │◄─────────┤  - Deferred writes   │
+│    operations    │          │  - Atomic commit     │
 │  - User context  │          └──────────────────────┘
-│  - TX метаданные │
-│  - События       │
+│  - TX metadata   │
+│  - Events        │
 └──────────────────┘
 ```
 
-### Поток запроса
+### Request Flow
 
 ```
-Запрос клиента
+Client request
       │
       ▼
-[Сеть Fabric]
+[Fabric Network]
       │
       ▼
 TransportFabricChaincode.Invoke()
@@ -307,53 +312,53 @@ TransportFabricChaincode.Invoke()
       ▼
 TransportFabricChaincodeReceiver.invoke()
       │
-      ├──► Парсинг payload
-      ├──► Создание stub
-      ├──► Валидация подписи
-      │     └──► Проверка алгоритма
-      │     └──► Проверка публичного ключа
-      │     └──► Валидация nonce (защита от replay)
-      │     └──► Криптографическая верификация
+      ├──► Parse payload
+      ├──► Create stub
+      ├──► Validate signature
+      │     └──► Check algorithm
+      │     └──► Check public key
+      │     └──► Validate nonce (replay protection)
+      │     └──► Cryptographic verification
       │
-      ├──► Создание wrapper команды
-      ├──► Диспетчеризация обработчику
-      │
-      ▼
-[Ваш обработчик команды]
-      │
-      ├──► Выполнение бизнес-логики
-      ├──► Операции с состоянием
-      ├──► Диспетчеризация событий
+      ├──► Create command wrapper
+      ├──► Dispatch to handler
       │
       ▼
-Ответ отправляется обратно через Fabric
+[Your command handler]
+      │
+      ├──► Execute business logic
+      ├──► State operations
+      ├──► Dispatch events
+      │
+      ▼
+Response is sent back through Fabric
 ```
 
-## Справочник API
+## API Reference
 
-### Классы
+### Classes
 
 #### `TransportFabricChaincode<T>`
 
-Абстрактный базовый класс для реализации chaincode.
+The abstract base class for chaincode implementation.
 
-**Параметры типа:**
-- `T` - Пользовательский тип события
+**Type parameters:**
+- `T` - The custom event type
 
-**Методы:**
-- `Init(stub: ChaincodeStub): Promise<ChaincodeResponse>` - Инициализация chaincode
-- `Invoke(stub: ChaincodeStub): Promise<ChaincodeResponse>` - Обработка вызовов
+**Methods:**
+- `Init(stub: ChaincodeStub): Promise<ChaincodeResponse>` - Chaincode initialization
+- `Invoke(stub: ChaincodeStub): Promise<ChaincodeResponse>` - Invocation handling
 
-**Свойства:**
-- `events: Observable<ObservableData<T | TransportFabricChaincodeEvent>>` - Поток событий
-- `name: string` - Имя chaincode (абстрактное, должно быть реализовано)
-- `internalLoggerLevel: LoggerLevel` - Установка уровня логирования fabric-shim
+**Properties:**
+- `events: Observable<ObservableData<T | TransportFabricChaincodeEvent>>` - The event stream
+- `name: string` - The chaincode name (abstract, must be implemented)
+- `internalLoggerLevel: LoggerLevel` - Sets the fabric-shim logging level
 
 #### `TransportFabricChaincodeReceiver<T>`
 
-Обрабатывает обработку запросов и диспетчеризацию команд.
+Handles request processing and command dispatching.
 
-**Опции конструктора:**
+**Constructor options:**
 ```typescript
 interface ITransportFabricChaincodeSettings {
     cryptoManagers?: Array<ITransportCryptoManager>;
@@ -363,57 +368,57 @@ interface ITransportFabricChaincodeSettings {
 }
 ```
 
-**Методы:**
+**Methods:**
 - `invoke<U, V>(chaincode: ChaincodeStub): Promise<ITransportFabricResponsePayload<V>>`
 - `complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void`
 
 #### `TransportFabricStub`
 
-Обертка вокруг ChaincodeStub из fabric-shim с расширенной функциональностью.
+A wrapper around ChaincodeStub from fabric-shim with extended functionality.
 
-**Методы работы с состоянием:**
+**State operation methods:**
 ```typescript
-// Получение состояния с автоматической десериализацией
+// Get state with automatic deserialization
 getState<U>(key: string, type?: ClassType<U>): Promise<U>
 
-// Получение сырого состояния как строки
+// Get raw state as a string
 getStateRaw(key: string): Promise<string>
 
-// Сохранение состояния с валидацией и трансформацией
+// Save state with validation and transformation
 putState<U>(key: string, value: U, options: IPutStateOptions): Promise<U>
 
-// Сохранение сырого состояния
+// Save raw state
 putStateRaw(key: string, item: string): Promise<void>
 
-// Проверка существования состояния
+// Check whether state exists
 hasState(key: string): Promise<boolean>
 hasNotState(key: string): Promise<boolean>
 
-// Удаление состояния
+// Remove state
 removeState(key: string): Promise<void>
 
-// Запросы по диапазону
+// Range queries
 getStateByRange(startKey: string, endKey: string): Promise<StateQueryIterator>
 getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark?): Promise<StateQueryResponse>
 ```
 
-**Свойства:**
+**Properties:**
 ```typescript
-stub: ChaincodeStub          // Оригинальный stub из fabric-shim
-requestId: string            // Уникальный ID запроса
-user: IStubUser              // Информация об аутентифицированном пользователе
+stub: ChaincodeStub          // The original stub from fabric-shim
+requestId: string            // Unique request ID
+user: IStubUser              // Information about the authenticated user
   └─ id: string
   └─ publicKey: string
-transaction: IStubTransaction // Метаданные транзакции
+transaction: IStubTransaction // Transaction metadata
   └─ hash: string
   └─ date: Date
 ```
 
 #### `StateProxy`
 
-Транзакционное управление состоянием с кешированием.
+Transactional state management with caching.
 
-**Методы:**
+**Methods:**
 ```typescript
 getState(key: string): Promise<string>
 putState(key: string, item: string): void
@@ -421,42 +426,42 @@ removeState(key: string): void
 checkKV(items: Array<IKeyValue>): void
 ```
 
-**Свойства:**
+**Properties:**
 ```typescript
-toPut: Map<string, string>      // Ожидающие записи
-toRemove: Array<string>         // Ожидающие удаления
+toPut: Map<string, string>      // Pending writes
+toRemove: Array<string>         // Pending removals
 ```
 
 #### `TransportFabricChaincodeReceiverBatch`
 
-Расширяет receiver возможностями пакетной обработки.
+Extends the receiver with batch-processing capabilities.
 
-**Дополнительные настройки:**
+**Additional settings:**
 ```typescript
 interface ITransportFabricSettingsBatch {
-    timeout: number;          // Мин. мс между выполнением пакетов
-    algorithm: string;        // Требуемый алгоритм подписи для пакетов
-    publicKey: string;        // Требуемый публичный ключ для пакетов
+    timeout: number;          // Min. ms between batch executions
+    algorithm: string;        // Required signature algorithm for batches
+    publicKey: string;        // Required public key for batches
 }
 ```
 
-### Коды ошибок
+### Error Codes
 
 ```typescript
 enum ErrorCode {
-    // Ошибки подписи
+    // Signature errors
     COMMAND_SIGNATURE_INVALID
     COMMAND_SIGNATURE_NOT_FOUND
     COMMAND_SIGNATURE_ALGORITHM_NOT_FOUND
     COMMAND_SIGNATURE_ALGORITHM_UNKNOWN
     COMMAND_SIGNATURE_PUBLIC_KEY_NOT_FOUND
 
-    // Ошибки nonce (защита от replay)
+    // Nonce errors (replay protection)
     COMMAND_SIGNATURE_NONCE_NOT_FOUND
     COMMAND_SIGNATURE_NONCE_LESS_THAN_PREVIOUS
     COMMAND_SIGNATURE_NONCE_NOT_NUMERIC_STRING
 
-    // Ошибки пакетной обработки
+    // Batch-processing errors
     COMMAND_BATCH_NO_COMMANDS_TO_BATCH
     COMMAND_BATCH_TIMEOUT_NOT_EXCEED
     COMMAND_BATCH_SIGNATURE_ALGORITHM_INVALID
@@ -464,40 +469,40 @@ enum ErrorCode {
 }
 ```
 
-## Продвинутое использование
+## Advanced Usage
 
-### Кастомная реализация Stub
+### Custom Stub Implementation
 
 ```typescript
 import { TransportFabricStub } from '@hlf-core/transport-chaincode';
 
 export class CustomStub extends TransportFabricStub {
-    // Добавление кастомных методов
+    // Add custom methods
     async getUserBalance(userId: string): Promise<number> {
         const balance = await this.getState(`balance_${userId}`);
         return balance ? parseInt(balance) : 0;
     }
 
-    // Переопределение существующих методов
+    // Override existing methods
     async putState<U>(key: string, value: U, options): Promise<U> {
-        // Добавление кастомного логирования
-        this.logger.debug(`Запись в состояние: ${key}`);
+        // Add custom logging
+        this.logger.debug(`Writing to state: ${key}`);
 
-        // Вызов родительской реализации
+        // Call the parent implementation
         return super.putState(key, value, options);
     }
 }
 
-// Использование в конфигурации transport
+// Use in the transport configuration
 const transport = new TransportFabricChaincodeReceiver({
     stubFactory: (logger, stub, payload, transport) =>
         new CustomStub(logger, stub, payload.id, payload.options, transport)
 });
 ```
 
-### Chaincode с начальными данными (Seeded)
+### Seeded Chaincode
 
-Инициализация chaincode с данными по умолчанию:
+Initialize chaincode with default data:
 
 ```typescript
 import {
@@ -507,13 +512,13 @@ import {
 
 export class MySeeder extends Seeder {
     async seed(stub: ChaincodeStub): Promise<void> {
-        // Инициализация конфигурации по умолчанию
+        // Initialize the default configuration
         await stub.putState('config', {
             version: '1.0.0',
             createdAt: new Date()
         });
 
-        // Сохранение маркера seed
+        // Save the seed marker
         await this.put(stub);
     }
 }
@@ -530,37 +535,37 @@ export class MyChaincode extends TransportFabricSeededChaincode<MySeeder> {
 }
 ```
 
-### Пример пагинации
+### Pagination Example
 
 ```typescript
 import { IPageBookmark } from '@ts-core/common';
 
-// Запрос с пагинацией
+// Paginated query
 async function getAllUsers(stub: TransportFabricStub) {
     const request: IPageBookmark = {
         pageSize: 100,
-        pageBookmark: undefined  // Начало с начала
+        pageBookmark: undefined  // Start from the beginning
     };
 
     const result = await stub.getPaginatedKV(
         request,
-        'user_',      // Начальный ключ
-        'user_\uffff' // Конечный ключ
+        'user_',      // Start key
+        'user_￿' // End key
     );
 
-    console.log('Пользователи:', result.items);
-    console.log('Есть еще:', !result.isAllLoaded);
-    console.log('Следующая закладка:', result.pageBookmark);
+    console.log('Users:', result.items);
+    console.log('Has more:', !result.isAllLoaded);
+    console.log('Next bookmark:', result.pageBookmark);
 
-    // Загрузка следующей страницы
+    // Load the next page
     if (!result.isAllLoaded) {
         request.pageBookmark = result.pageBookmark;
-        const nextPage = await stub.getPaginatedKV(request, 'user_', 'user_\uffff');
+        const nextPage = await stub.getPaginatedKV(request, 'user_', 'user_￿');
     }
 }
 ```
 
-### Вызов другого Chaincode
+### Invoking Another Chaincode
 
 ```typescript
 import { ITransportCommandInvokeOptions } from '@hlf-core/chaincode';
@@ -576,56 +581,56 @@ async function callOtherChaincode(stub: TransportFabricStub) {
             algorithm: 'secp256k1',
             publicKey: stub.user.publicKey,
             nonce: '1234',
-            value: 'значение-подписи'
+            value: 'signature-value'
         }
     };
 
-    // Fire and forget (без ожидания ответа)
+    // Fire and forget (without waiting for a response)
     stub.invokeSend(command, options);
 
-    // Ожидание ответа
+    // Wait for a response
     const response = await stub.invokeSendListen(command, options);
-    console.log('Ответ:', response);
+    console.log('Response:', response);
 }
 ```
 
-## Безопасность
+## Security
 
-### Валидация подписей
+### Signature Validation
 
-Библиотека реализует комплексную криптографическую валидацию подписей:
+The library implements comprehensive cryptographic signature validation:
 
-1. **Проверка алгоритма**: Убеждается, что алгоритм подписи находится в списке разрешенных
-2. **Валидация публичного ключа**: Проверяет, что публичный ключ авторизован
-3. **Управление nonce**: Предотвращает replay-атаки используя монотонно возрастающие nonce
-4. **Криптографическая верификация**: Использует TransportCryptoManager для проверки подписи
+1. **Algorithm check**: Ensures the signature algorithm is in the list of allowed ones
+2. **Public key validation**: Verifies that the public key is authorized
+3. **Nonce management**: Prevents replay attacks by using monotonically increasing nonces
+4. **Cryptographic verification**: Uses TransportCryptoManager to verify the signature
 
-### Защита от Replay-атак
+### Replay Attack Protection
 
-Nonce хранятся для каждого пользователя и должны строго возрастать:
+Nonces are stored per user and must strictly increase:
 
 ```typescript
-// Формат ключа хранения nonce
+// Nonce storage key format
 `→${userId}~nonce`
 
-// Правила валидации
-1. Nonce должен быть числовой строкой
-2. Nonce должен быть больше предыдущего nonce
-3. Nonce сохраняется в состояние после успешной валидации
-4. Readonly команды не обновляют сохраненный nonce
+// Validation rules
+1. Nonce must be a numeric string
+2. Nonce must be greater than the previous nonce
+3. Nonce is saved to state after successful validation
+4. Readonly commands do not update the stored nonce
 ```
 
-### Лучшие практики
+### Best Practices
 
-1. **Всегда используйте подписи** в production - отключайте только для конкретных команд
-2. **Регулярно ротируйте ключи** - обновляйте конфигурацию cryptoManagers
-3. **Мониторьте пропуски nonce** - большие пропуски могут указывать на проблемы
-4. **Валидируйте все входные данные** - используйте декораторы class-validator
-5. **Санитизируйте ключи состояния** - предотвращайте атаки инъекции ключей
+1. **Always use signatures** in production - disable them only for specific commands
+2. **Rotate keys regularly** - update the cryptoManagers configuration
+3. **Monitor nonce gaps** - large gaps may indicate problems
+4. **Validate all input data** - use class-validator decorators
+5. **Sanitize state keys** - prevent key injection attacks
 
-## Примеры
+## Examples
 
-### Полный пример Chaincode
+### Complete Chaincode Example
 
 ```typescript
 import { ILogger, LoggerWrapper } from '@ts-core/common';
@@ -646,7 +651,7 @@ export class UserChaincode extends TransportFabricChaincode<UserEvent> {
 
         super(logger, transport);
 
-        // Регистрация обработчиков команд
+        // Register command handlers
         this.transport.listen('CreateUserCommand', (command) =>
             new CreateUserHandler().execute(command)
         );
@@ -654,10 +659,10 @@ export class UserChaincode extends TransportFabricChaincode<UserEvent> {
             new UpdateUserHandler().execute(command)
         );
 
-        // Мониторинг событий
+        // Monitor events
         this.events.subscribe((event) => {
             if (event.type === TransportFabricChaincodeEvent.INVOKE_ERROR) {
-                this.error('Ошибка команды:', event.data.response);
+                this.error('Command error:', event.data.response);
             }
         });
     }
@@ -667,20 +672,20 @@ export class UserChaincode extends TransportFabricChaincode<UserEvent> {
     }
 }
 
-// Запуск chaincode
+// Start the chaincode
 const logger = new ConsoleLogger();
 const chaincode = new UserChaincode(logger);
 
 require('fabric-shim').start(chaincode);
 ```
 
-### Тестирование с Mock Stub
+### Testing with a Mock Stub
 
 ```typescript
 import { ChaincodeStub } from 'fabric-shim';
 import { TransportFabricRequestPayload } from '@hlf-core/transport-common';
 
-// Создание mock stub для тестирования
+// Create a mock stub for testing
 const mockStub = {
     getState: jest.fn(),
     putState: jest.fn(),
@@ -693,7 +698,7 @@ const mockStub = {
         params: [JSON.stringify({
             id: 'cmd-123',
             name: 'CreateUserCommand',
-            request: { name: 'Иван' },
+            request: { name: 'John' },
             options: {
                 userId: 'user-123',
                 signature: {
@@ -707,75 +712,75 @@ const mockStub = {
     })
 } as any;
 
-// Тестирование вызова
+// Test the invocation
 const response = await transport.invoke(mockStub);
 expect(response.error).toBeNull();
 ```
 
-## Участие в разработке
+## Contributing
 
-Мы приветствуем вклад в развитие проекта! Эта библиотека является частью экосистемы hlf-core.
+We welcome contributions to the project! This library is part of the hlf-core ecosystem.
 
-### Настройка окружения разработки
+### Development Environment Setup
 
 ```bash
-# Клонирование репозитория
+# Clone the repository
 git clone https://github.com/ManhattanDoctor/hlf-core-transport-chaincode.git
 cd hlf-core-transport-chaincode
 
-# Установка зависимостей
+# Install dependencies
 npm install
 
-# Сборка
+# Build
 make build
 
-# Очистка артефактов сборки
+# Clean build artifacts
 make clean
 ```
 
-### Цели сборки
+### Build Targets
 
-- `make build` - Сборка модулей CommonJS и ESM
-- `make clean` - Удаление артефактов сборки
-- `make publish` - Публикация в npm
-- `make publish_patch` - Увеличение patch версии и публикация
-- `make publish_minor` - Увеличение minor версии и публикация
-- `make publish_major` - Увеличение major версии и публикация
+- `make build` - Build the CommonJS and ESM modules
+- `make clean` - Remove build artifacts
+- `make publish` - Publish to npm
+- `make publish_patch` - Increment the patch version and publish
+- `make publish_minor` - Increment the minor version and publish
+- `make publish_major` - Increment the major version and publish
 
-### Стиль кода
+### Code Style
 
-Пожалуйста, убедитесь в:
-- Соответствии TypeScript strict mode
-- Последовательных соглашениях об именовании
-- Исчерпывающих JSDoc комментариях для публичных API
-- Unit тестах для новых функций (TODO: тесты нужно добавить)
+Please ensure:
+- Compliance with TypeScript strict mode
+- Consistent naming conventions
+- Exhaustive JSDoc comments for public APIs
+- Unit tests for new features
 
-## Связанные библиотеки
+## Related Packages
 
-Часть **экосистемы hlf-core**:
+Part of the **hlf-core ecosystem**:
 
-- [@hlf-core/chaincode](https://github.com/ManhattanDoctor/hlf-core-chaincode) - ORM-подобное управление сущностями для Fabric
-- [@hlf-core/transport-common](https://github.com/ManhattanDoctor/hlf-core-transport-common) - Общие типы транспорта
-- [@hlf-core/transport](https://github.com/ManhattanDoctor/hlf-core-transport) - Клиентский транспорт
-- [@ts-core/common](https://github.com/ManhattanDoctor/ts-core-common) - Базовые TypeScript утилиты
+- [@hlf-core/chaincode](https://github.com/ManhattanDoctor/hlf-core-chaincode) - ORM-like entity management for Fabric
+- [@hlf-core/transport-common](https://github.com/ManhattanDoctor/hlf-core-transport-common) - Common transport types
+- [@hlf-core/transport](https://github.com/ManhattanDoctor/hlf-core-transport) - Client-side transport
+- [@ts-core/common](https://github.com/ManhattanDoctor/ts-core-common) - Core TypeScript utilities
 
-## Лицензия
+## License
 
 ISC
 
-## Автор
+## Author
 
-**Ренат Губаев**
+**Renat Gubaev**
 - Email: renat.gubaev@gmail.com
 - GitHub: [@ManhattanDoctor](https://github.com/ManhattanDoctor)
 
-## Ссылки
+## Links
 
 - [GitHub Repository](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode)
 - [NPM Package](https://www.npmjs.com/package/@hlf-core/transport-chaincode)
 - [Issue Tracker](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues)
 - [Hyperledger Fabric Documentation](https://hyperledger-fabric.readthedocs.io/)
 
-## Поддержка
+## Support
 
-Если вы нашли баг или у вас есть предложение по улучшению, пожалуйста, создайте issue в [GitHub Issues](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues).
+If you have found a bug or have a suggestion for improvement, please create an issue in [GitHub Issues](https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues).

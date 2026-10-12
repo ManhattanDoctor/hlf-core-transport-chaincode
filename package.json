@@ -20,7 +20,7 @@
         "@hlf-core/transport-common": "~3.0.16"
     },
     "devDependencies": {
-        "gulp-npm-module-publisher": "~3.0.5"
+        "gulp-npm-module-publisher": "^3.0.6"
     },
     "repository": {
         "type": "git",
@@ -41,5 +41,5 @@
     "bugs": {
         "url": "https://github.com/ManhattanDoctor/hlf-core-transport-chaincode/issues"
     },
-    "homepage": "https://github.com/ManhattanDoctor/hlf-core-transport-chaincode#readme"
+    "homepage": "https://hlf.gnosisai.ru/docs/packages/transport-chaincode"
 }
